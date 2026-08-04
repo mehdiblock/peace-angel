@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Peace Angel Foundation | Decentralized War Insurance</title>
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --bg: #080c17; --bg2: #0d1229; --bg3: #111830;
+            --gold: #ffd700; --gold2: #ffaa00;
+            --text: #ffffff; --text2: #aaaacc;
+            --card: rgba(20, 25, 45, 0.85); --border: rgba(255, 215, 0, 0.25);
+            --green: #27ae60; --red: #e74c3c;
+            --shadow-gold: 0 0 40px rgba(255,215,0,0.35);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7; overflow-x: hidden; width: 100%;
+        }
+        body.rtl { direction: rtl; }
+
+        /* ============ PARTICLES ============ */
+        #particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ============ LOGO (CSS-based) ============ */
+        .logo-css {
+            width: 50px; height: 50px; position: relative; display: inline-block;
+            animation: logo-rotate 20s linear infinite; flex-shrink: 0;
+        }
+        .logo-outer {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(#ffd700, #ffaa00, #ffd700, #ffcc00, #ffd700);
+            box-shadow: 0 0 25px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .logo-inner {
+            width: 70%; height: 70%; border-radius: 50%;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6em;
+        }
+        @keyframes logo-rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse-logo {
+            0%, 100% { box-shadow: 0 0 25px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.3); }
+            50% { box-shadow: 0 0 45px rgba(255,215,0,0.9), 0 0 100px rgba(255,215,0,0.5); }
+        }
+        .logo-css .logo-outer { animation: pulse-logo 2s infinite; }
+
+        /* ============ HEADER ============ */
+        header {
+            background: rgba(10,15,31,0.96); backdrop-filter: blur(20px);
+            padding: 12px 4%; display: flex; align-items: center;
+            justify-content: space-between; border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 1000; flex-wrap: wrap; gap: 10px;
+            width: 100%;
+        }
+        header.scrolled { padding: 8px 4%; background: rgba(10,15,31,0.99); }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-text { font-size: 1.1em; font-weight: bold; color: var(--gold); white-space: nowrap; }
+        nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        nav a { 
+            color: var(--text2); text-decoration: none; font-size: 0.85em; 
+            transition: all 0.3s; position: relative; padding: 5px 0; white-space: nowrap;
+        }
+        nav a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--gold); transition: width 0.3s; }
+        nav a:hover { color: var(--gold); }
+        nav a:hover::after { width: 100%; }
+        .lang-switch { display: flex; gap: 4px; }
+        .lang-btn {
+            background: transparent; border: 1px solid var(--border); color: var(--text2);
+            padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: all 0.3s;
+        }
+        .lang-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
+        .wallet-btn {
+            background: linear-gradient(135deg, #ffd700, #ffaa00); color: var(--bg);
+            font-weight: bold; padding: 9px 18px; border: none; border-radius: 20px;
+            cursor: pointer; font-size: 0.8em; transition: all 0.3s; white-space: nowrap;
+            animation: glow-btn 2s infinite;
+        }
+        @keyframes glow-btn {
+            0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.5); }
+            50% { box-shadow: 0 0 30px rgba(255,215,0,0.8); }
+        }
+        .wallet-btn.connected { background: var(--green); color: white; animation: none; }
+        .wallet-btn:hover { transform: scale(1.05); }
+        .wallet-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;
+        }
+        .wallet-modal.active { display: flex; }
+        .wallet-modal-content {
+            background: var(--bg2); border: 2px solid var(--gold); border-radius: 20px;
+            padding: 30px; text-align: center; max-width: 400px; width: 90%;
+        }
+        .wallet-option {
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 15px; margin: 10px 0; cursor: pointer; transition: all 0.3s; display: flex;
+            align-items: center; gap: 15px;
+        }
+        .wallet-option:hover { border-color: var(--gold); background: rgba(255,215,0,0.1); }
+        .wallet-option img { width: 40px; height: 40px; }
+
+        /* ============ SECTIONS ============ */
+        .section {
+            position: relative; z-index: 1; padding: 60px 4%; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .section-dark { background-color: var(--bg); }
+        .section-darker { background-color: var(--bg2); }
+        .section-gradient { background: linear-gradient(135deg, var(--bg) 0%, var(--bg3) 50%, var(--bg) 100%); }
+        .section-title {
+            text-align: center; color: var(--gold); font-size: clamp(1.5em, 4vw, 2.2em);
+            margin-bottom: 12px; position: relative;
+        }
+        .section-title::after {
+            content: ''; display: block; width: 60px; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 12px auto 0;
+        }
+        .section-subtitle { text-align: center; color: var(--text2); font-size: 1em; max-width: 600px; margin: 0 auto 30px; padding: 0 10px; }
+
+        /* ============ HERO ============ */
+        .hero { text-align: center; }
+        .hero h1 { font-size: clamp(1.8em, 5vw, 2.8em); color: var(--gold); margin-bottom: 15px; animation: fadeInDown 1s ease; }
+        .hero p { font-size: clamp(0.9em, 2vw, 1.15em); color: var(--text2); max-width: 700px; margin: 0 auto 25px; animation: fadeInUp 1s ease 0.3s both; padding: 0 10px; }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .hero-icon { font-size: clamp(3em, 8vw, 5em); animation: float 3s ease-in-out infinite; margin-bottom: 15px; }
+        .btn-gold {
+            background: linear-gradient(135deg, #ffd700, #ffaa00); color: var(--bg);
+            font-weight: bold; padding: clamp(12px, 2vw, 16px) clamp(30px, 5vw, 50px);
+            border: none; border-radius: 50px; font-size: clamp(0.9em, 2vw, 1.05em);
+            cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block;
+        }
+        .btn-gold:hover { transform: translateY(-3px); box-shadow: var(--shadow-gold); }
+        .btn-outline {
+            background: transparent; border: 2px solid var(--gold); color: var(--gold);
+            font-weight: bold; padding: clamp(10px, 2vw, 14px) clamp(25px, 4vw, 40px);
+            border-radius: 50px; font-size: clamp(0.85em, 1.8vw, 1em);
+            cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; margin-left: 10px;
+        }
+        .btn-outline:hover { background: rgba(255,215,0,0.1); transform: translateY(-3px); }
+
+        /* ============ STATS ============ */
+        .stats-row { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+        .stat-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: clamp(15px, 3vw, 25px); text-align: center; min-width: clamp(100px, 20vw, 160px);
+            transition: all 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-gold); }
+        .stat-number { font-size: clamp(1.5em, 4vw, 2.3em); color: var(--gold); font-weight: bold; }
+        .stat-label { color: var(--text2); margin-top: 5px; font-size: 0.85em; }
+
+        /* ============ WORLD MAP SVG ============ */
+        .world-map-container {
+            max-width: 800px; width: 100%; margin: 30px auto; text-align: center;
+        }
+        .world-map-container svg { width: 100%; height: auto; }
+        .country-path {
+            fill: #1a2040; stroke: rgba(255,215,0,0.3); stroke-width: 0.5;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .country-path.covered { fill: rgba(255,215,0,0.25); stroke: var(--gold); stroke-width: 1; }
+        .country-path.covered:hover { fill: rgba(255,215,0,0.5); }
+        .country-path:hover { fill: rgba(255,215,0,0.15); }
+
+        /* ============ FORM ============ */
+        .form-container {
+            max-width: 700px; width: 100%; margin: 0 auto;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: clamp(20px, 4vw, 35px);
+            backdrop-filter: blur(10px); transition: all 0.3s;
+        }
+        .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .form-row .form-group { flex: 1; min-width: 200px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; color: var(--text2); margin-bottom: 6px; font-weight: bold; font-size: 0.9em; }
+        label .required { color: var(--red); }
+        select, input, textarea {
+            width: 100%; padding: 12px 15px; background-color: #141929;
+            border: 1px solid rgba(255,215,0,0.3); border-radius: 10px;
+            color: white; font-size: 0.95em; font-family: inherit; transition: all 0.3s;
+        }
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+        textarea { resize: vertical; min-height: 80px; }
+        .map-picker {
+            width: 100%; height: clamp(200px, 40vw, 300px); border-radius: 10px;
+            border: 1px solid rgba(255,215,0,0.3); overflow: hidden; margin-bottom: 10px;
+        }
+        .coordinates-display {
+            background: #141929; padding: 8px 15px; border-radius: 8px;
+            color: var(--gold); font-size: 0.85em; text-align: center; margin-top: 5px;
+        }
+        .calculate-btn, .pay-btn {
+            width: 100%; background: linear-gradient(135deg, #ffd700, #ffaa00); color: var(--bg);
+            font-weight: bold; padding: 15px; border: none; border-radius: 12px;
+            font-size: 1.05em; cursor: pointer; transition: all 0.3s; margin-top: 10px;
+        }
+        .calculate-btn:hover, .pay-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+        .pay-btn { background: var(--green); color: white; display: none; }
+        .pay-btn.active { display: block; }
+        .pay-btn:disabled { background: #555; cursor: not-allowed; transform: none; }
+        .result-box {
+            margin-top: 20px; padding: 20px; background: rgba(255,215,0,0.08);
+            border: 1px solid var(--gold); border-radius: 15px; text-align: center; display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+        .result-box.active { display: block; }
+        .result-amount { font-size: 1.8em; color: var(--gold); font-weight: bold; }
+        .result-detail { color: var(--text2); margin: 6px 0; font-size: 0.9em; }
+        .payment-options { margin-top: 15px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .payment-card {
+            background: rgba(20,25,45,0.9); border: 2px solid var(--border); border-radius: 14px;
+            padding: 18px; text-align: center; cursor: pointer; transition: all 0.3s;
+            min-width: clamp(120px, 25vw, 160px); flex: 1;
+        }
+        .payment-card.selected { border-color: var(--gold); background: rgba(255,215,0,0.15); box-shadow: 0 0 30px rgba(255,215,0,0.2); }
+        .payment-card h3 { color: var(--gold); font-size: 1.1em; }
+        .payment-card .price { font-size: 1.4em; color: white; font-weight: bold; }
+        .badge {
+            display: inline-block; background: var(--green); color: white;
+            padding: 3px 12px; border-radius: 20px; font-size: 0.7em; margin-bottom: 8px; font-weight: bold;
+        }
+        .error-msg { color: var(--red); font-size: 0.8em; margin-top: 5px; display: none; }
+        .error-msg.show { display: block; }
+
+        /* ============ INVOICE ============ */
+        .invoice-container {
+            max-width: 750px; width: 100%; margin: 0 auto;
+            background: white; border-radius: 20px; padding: clamp(20px, 4vw, 40px);
+            text-align: center; animation: fadeInUp 0.6s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5); color: #1a1a2e;
+        }
+        .invoice-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #ffd700; padding-bottom: 20px; margin-bottom: 20px;
+            flex-wrap: wrap; gap: 15px;
+        }
+        .invoice-stamp {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(#ffd700, #ffaa00, #ffd700, #ffcc00, #ffd700);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5em; box-shadow: 0 0 30px rgba(255,215,0,0.5);
+        }
+        .invoice-title { font-size: 1.6em; color: #1a1a2e; font-weight: bold; }
+        .invoice-id {
+            font-size: 1.3em; color: #ffaa00; font-weight: bold;
+            letter-spacing: 2px; padding: 10px; background: #f9f9f9; border-radius: 10px;
+            font-family: 'Courier New', monospace;
+        }
+        .invoice-details { text-align: left; margin: 20px 0; }
+        .invoice-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+        .invoice-row strong { color: #555; }
+        .invoice-actions { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+        .btn-print, .btn-pdf {
+            padding: 12px 30px; border-radius: 30px; font-weight: bold; cursor: pointer;
+            transition: all 0.3s; border: none; font-size: 0.95em;
+        }
+        .btn-print { background: #333; color: white; }
+        .btn-pdf { background: var(--gold); color: #1a1a2e; }
+        .btn-print:hover, .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+
+        /* ============ ABOUT ============ */
+        .about-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px; max-width: 1000px; width: 100%; margin: 0 auto;
+        }
+        .about-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+            padding: 25px; text-align: center; transition: all 0.3s;
+        }
+        .about-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-gold); }
+        .about-card .icon { font-size: 2.5em; margin-bottom: 12px; }
+        .about-card h3 { color: var(--gold); margin-bottom: 8px; font-size: 1.15em; }
+        .about-card p { color: var(--text2); font-size: 0.9em; }
+
+        /* ============ FAQ ============ */
+        .faq-container { max-width: 700px; width: 100%; margin: 0 auto; }
+        .faq-item {
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            margin-bottom: 12px; overflow: hidden; transition: all 0.3s;
+        }
+        .faq-question {
+            padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between;
+            align-items: center; font-weight: bold; color: var(--gold); transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        .faq-question:hover { background: rgba(255,215,0,0.05); }
+        .faq-question .arrow { transition: transform 0.3s; font-size: 1.1em; }
+        .faq-item.open .faq-question .arrow { transform: rotate(180deg); }
+        .faq-answer { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; color: var(--text2); font-size: 0.9em; }
+        .faq-item.open .faq-answer { max-height: 250px; padding: 0 20px 16px; }
+
+        /* ============ POLICIES ============ */
+        .policies-table {
+            width: 100%; max-width: 800px; margin: 0 auto; border-collapse: collapse;
+            font-size: 0.9em; overflow-x: auto; display: block;
+        }
+        .policies-table th { background: rgba(255,215,0,0.1); color: var(--gold); padding: 10px; border-bottom: 2px solid var(--gold); white-space: nowrap; }
+        .policies-table td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--text2); text-align: center; white-space: nowrap; }
+        .policies-table tr:hover td { background: rgba(255,215,0,0.03); }
+
+        /* ============ LOADING ============ */
+        .loading-spinner {
+            display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: var(--gold); animation: spin 0.8s linear infinite;
+            vertical-align: middle; margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .success-icon { font-size: 3.5em; animation: bounce 1s ease; }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+
+        /* ============ FOOTER ============ */
+        footer {
+            background-color: #050810; text-align: center; padding: 25px 4%;
+            border-top: 1px solid var(--border); color: #888899; font-size: 0.85em;
+            position: relative; z-index: 1;
+        }
+
+        /* ============ MOBILE FIXES ============ */
+        @media (max-width: 768px) {
+            .section { padding: 40px 3%; }
+            nav { gap: 8px; }
+            nav a { font-size: 0.75em; }
+            .wallet-btn { font-size: 0.7em; padding: 7px 14px; }
+            .form-row { flex-direction: column; gap: 0; }
+            .form-row .form-group { min-width: 100%; }
+            .btn-outline { margin-left: 0; margin-top: 8px; display: block; }
+            .stats-row { gap: 10px; }
+            .invoice-header { flex-direction: column; text-align: center; }
+            .invoice-row { flex-direction: column; text-align: center; }
+            .about-grid { grid-template-columns: 1fr; }
+            .policies-table { font-size: 0.7em; }
+            .payment-card { min-width: 100px; padding: 12px; }
+            .payment-card h3 { font-size: 0.9em; }
+            .payment-card .price { font-size: 1.1em; }
+            .map-picker { height: 200px; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.5em; }
+            .hero p { font-size: 0.85em; }
+            .btn-gold, .btn-outline { font-size: 0.8em; padding: 10px 25px; }
+            .section-title { font-size: 1.3em; }
+            .stat-card { min-width: 80px; padding: 12px; }
+            .stat-number { font-size: 1.3em; }
+            .logo-css { width: 36px; height: 36px; }
+            .logo-text { font-size: 0.9em; }
+        }
+        @media print {
+            body { background: white; color: black; }
+            header, footer, .section, #particles { display: none; }
+            .invoice-container { box-shadow: none; border: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particles"></canvas>
+
+    <!-- HEADER -->
+    <header id="mainHeader">
+        <div class="logo-area">
+            <div class="logo-css"><div class="logo-outer"><div class="logo-inner">🕊️</div></div></div>
+            <span class="logo-text">Peace Angel</span>
+        </div>
+        <nav>
+            <a href="#home" data-key="nav_home">Home</a>
+            <a href="#about" data-key="nav_about">About</a>
+            <a href="#insurance" data-key="nav_insurance">Insurance</a>
+            <a href="#faq" data-key="nav_faq">FAQ</a>
+            <a href="#policies" data-key="nav_policies">My Policies</a>
+            <button class="wallet-btn" id="connectWalletBtn" onclick="openWalletModal()" data-key="connect_wallet">Connect Wallet</button>
+        </nav>
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="switchLang('en')">EN</button>
+            <button class="lang-btn" onclick="switchLang('ar')">AR</button>
+            <button class="lang-btn" onclick="switchLang('fr')">FR</button>
+        </div>
+    </header>
+
+    <!-- WALLET MODAL -->
+    <div class="wallet-modal" id="walletModal" onclick="closeWalletModal(event)">
+        <div class="wallet-modal-content" onclick="event.stopPropagation()">
+            <h3 style="color:var(--gold);margin-bottom:20px;">Connect Wallet</h3>
+            <div class="wallet-option" onclick="connectMetaMask()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask">
+                <span>MetaMask</span>
+            </div>
+            <div class="wallet-option" onclick="connectWalletConnect()">
+                <img src="https://trustwallet.com/assets/images/favicon.png" alt="WalletConnect">
+                <span>WalletConnect (Trust Wallet & more)</span>
+            </div>
+            <button style="margin-top:15px;background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 20px;border-radius:8px;cursor:pointer;" onclick="closeWalletModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- HOME -->
+    <section class="section section-gradient" id="home">
+        <div class="hero" data-aos="fade-up">
+            <div class="hero-icon">🕊️</div>
+            <h1 data-key="hero_title">Decentralized War Insurance</h1>
+            <p data-key="hero_desc">The world's first blockchain-based war insurance protocol. Protect your home against bombings and armed conflicts. Pay with crypto.</p>
+            <a href="#insurance" class="btn-gold" data-key="hero_btn">Get Insured Now</a>
+            <a href="#about" class="btn-outline" data-key="hero_learn">Learn More</a>
+        </div>
+        <div class="stats-row">
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-number">100%</div><div class="stat-label" data-key="stat_decentralized">Decentralized</div>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-number">24/7</div><div class="stat-label" data-key="stat_instant">Instant Claims</div>
+            </div>
+            <div class="stat-card" data-aos="fade-up" data-aos-delay="600">
+                <div class="stat-number">15+</div><div class="stat-label" data-key="stat_countries">Countries</div>
+            </div>
+        </div>
+        <div class="world-map-container" data-aos="zoom-in">
+            <h3 style="color:var(--gold);margin-bottom:15px;" data-key="map_title">Covered Countries</h3>
+            <svg viewBox="0 0 1000 500" id="worldMap">
+                <!-- Simplified world map paths - covered countries in gold -->
+                <path class="country-path covered" d="M680,200 Q700,180 720,190 Q730,210 710,220 Z" data-country="Afghanistan"/><text x="700" y="215" fill="white" font-size="8">AF</text>
+                <path class="country-path covered" d="M590,210 Q610,195 625,205 Q620,225 600,225 Z" data-country="Syria"/><text x="605" y="220" fill="white" font-size="8">SY</text>
+                <path class="country-path covered" d="M610,260 Q630,250 645,260 Q640,280 615,278 Z" data-country="Yemen"/><text x="625" y="270" fill="white" font-size="8">YE</text>
+                <path class="country-path covered" d="M540,140 Q560,120 580,135 Q575,155 550,158 Z" data-country="Ukraine"/><text x="560" y="145" fill="white" font-size="8">UA</text>
+                <path class="country-path covered" d="M600,190 Q620,178 635,190 Q630,208 605,205 Z" data-country="Iraq"/><text x="615" y="197" fill="white" font-size="8">IQ</text>
+                <path class="country-path covered" d="M520,240 Q540,225 560,240 Q555,258 525,255 Z" data-country="Sudan"/><text x="540" y="247" fill="white" font-size="8">SD</text>
+                <path class="country-path covered" d="M720,230 Q745,215 760,230 Q755,250 730,248 Z" data-country="Myanmar"/><text x="740" y="240" fill="white" font-size="8">MM</text>
+                <path class="country-path covered" d="M470,260 Q490,245 510,260 Q505,280 475,275 Z" data-country="Nigeria"/><text x="490" y="267" fill="white" font-size="8">NG</text>
+                <path class="country-path covered" d="M650,160 Q670,145 690,160 Q685,180 655,178 Z" data-country="Pakistan"/><text x="670" y="167" fill="white" font-size="8">PK</text>
+                <path class="country-path covered" d="M530,190 Q550,175 570,190 Q565,210 535,205 Z" data-country="Egypt"/><text x="550" y="197" fill="white" font-size="8">EG</text>
+                <path class="country-path covered" d="M620,150 Q640,135 660,150 Q655,170 625,168 Z" data-country="Iran"/><text x="640" y="157" fill="white" font-size="8">IR</text>
+                <path class="country-path covered" d="M560,155 Q580,140 600,155 Q595,175 565,172 Z" data-country="Turkey"/><text x="580" y="162" fill="white" font-size="8">TR</text>
+                <path class="country-path covered" d="M470,100 Q490,85 510,100 Q505,120 475,118 Z" data-country="Germany"/><text x="490" y="107" fill="white" font-size="8">DE</text>
+                <path class="country-path covered" d="M440,110 Q460,95 480,110 Q475,130 445,128 Z" data-country="France"/><text x="460" y="117" fill="white" font-size="8">FR</text>
+                <path class="country-path covered" d="M460,80 Q480,65 500,80 Q495,100 465,98 Z" data-country="Switzerland"/><text x="480" y="87" fill="white" font-size="8">CH</text>
+                <!-- Background countries (not covered) -->
+                <path class="country-path" d="M100,150 Q200,100 350,120 Q500,80 650,100 Q800,120 900,150 Q850,200 750,220 Q600,200 450,230 Q250,260 100,200 Z" />
+                <path class="country-path" d="M100,250 Q200,220 350,260 Q500,280 650,300 Q800,320 900,280 Q850,350 700,380 Q500,400 300,380 Q150,350 100,300 Z" />
+            </svg>
+            <p style="color:var(--text2);font-size:0.8em;margin-top:8px;" data-key="map_hint">Hover over countries to see coverage</p>
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section section-darker" id="about">
+        <h2 class="section-title" data-aos="fade-up" data-key="about_title">Why Peace Angel?</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-key="about_subtitle">Borderless, trustless insurance for those who need it most.</p>
+        <div class="about-grid">
+            <div class="about-card" data-aos="zoom-in" data-aos-delay="100"><div class="icon">🔗</div><h3 data-key="about_card1_title">Fully On-Chain</h3><p data-key="about_card1_desc">All policies stored on Polygon. Immutable and transparent.</p></div>
+            <div class="about-card" data-aos="zoom-in" data-aos-delay="200"><div class="icon">⚡</div><h3 data-key="about_card2_title">Instant Payout</h3><p data-key="about_card2_desc">Smart contracts release funds automatically.</p></div>
+            <div class="about-card" data-aos="zoom-in" data-aos-delay="300"><div class="icon">🌍</div><h3 data-key="about_card3_title">Global Access</h3><p data-key="about_card3_desc">Anyone, anywhere can get insured.</p></div>
+            <div class="about-card" data-aos="zoom-in" data-aos-delay="400"><div class="icon">🛡️</div><h3 data-key="about_card4_title">PAE Token</h3><p data-key="about_card4_desc">Pay with PAE and get 20% discount.</p></div>
+            <div class="about-card" data-aos="zoom-in" data-aos-delay="500"><div class="icon">💰</div><h3 data-key="about_card5_title">Low Premiums</h3><p data-key="about_card5_desc">Up to 60% cheaper by removing middlemen.</p></div>
+            <div class="about-card" data-aos="zoom-in" data-aos-delay="600"><div class="icon">🔐</div><h3 data-key="about_card6_title">Privacy First</h3><p data-key="about_card6_desc">No KYC. Your wallet is your identity.</p></div>
+        </div>
+    </section>
+
+    <!-- INSURANCE FORM -->
+    <section class="section section-gradient" id="insurance">
+        <h2 class="section-title" data-aos="fade-up" data-key="form_title">Get Your Insurance</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-key="form_subtitle">Fill all fields below. All fields are mandatory.</p>
+        
+        <div class="form-container" id="formContainer" data-aos="fade-up">
+            <!-- Country -->
+            <div class="form-group"><label data-key="label_country">Country <span class="required">*</span></label><select id="country"></select></div>
+            <div class="form-row">
+                <div class="form-group"><label data-key="label_house_value">Home Value (USD) <span class="required">*</span></label><input type="number" id="houseValue" placeholder="e.g. 100000" min="1000" step="1000"></div>
+                <div class="form-group"><label data-key="label_area">Area (m²) <span class="required">*</span></label><input type="number" id="area" placeholder="e.g. 120" min="10"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label data-key="label_rooms">Number of Rooms <span class="required">*</span></label><input type="number" id="rooms" placeholder="e.g. 3" min="1" max="20"></div>
+                <div class="form-group"><label data-key="label_year">Year Built <span class="required">*</span></label><input type="number" id="yearBuilt" placeholder="e.g. 2015" min="1900" max="2026"></div>
+            </div>
+            <!-- Map Picker -->
+            <div class="form-group">
+                <label data-key="label_location">Home Location (Click on map) <span class="required">*</span></label>
+                <div class="map-picker" id="mapPicker"></div>
+                <div class="coordinates-display" id="coordinatesDisplay">Lat: -- | Lng: --</div>
+                <input type="hidden" id="latitude"><input type="hidden" id="longitude">
+                <div class="error-msg" id="locationError" data-key="error_location">Please select your home location on the map.</div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label data-key="label_name">Full Name <span class="required">*</span></label><input type="text" id="fullName" placeholder="John Doe"></div>
+                <div class="form-group"><label data-key="label_email">Email Address <span class="required">*</span></label><input type="email" id="email" placeholder="john@example.com"></div>
+            </div>
+            <button class="calculate-btn" onclick="calculateInsurance()" data-key="calc_btn">Calculate Premium</button>
+
+            <div class="result-box" id="resultBox">
+                <p style="color:#aaaacc;" data-key="result_annual">Annual Premium:</p>
+                <p class="result-amount" id="resultAmount">--</p>
+                <p class="result-detail" id="resultDetail"></p>
+                <div class="payment-options" id="paymentOptions" style="display:none;">
+                    <div class="payment-card" id="paeCard" onclick="selectPayment('PAE')"><span class="badge">-20%</span><h3>PAE</h3><p class="price" id="paePrice">--</p></div>
+                    <div class="payment-card" id="usdtCard" onclick="selectPayment('USDT')"><h3>USDT</h3><p class="price" id="usdtPrice">--</p></div>
+                </div>
+                <button class="pay-btn" id="payBtn" onclick="executePayment()">Pay Now</button>
+            </div>
+        </div>
+
+        <!-- INVOICE -->
+        <div class="invoice-container" id="invoiceContainer" style="display:none;" data-aos="zoom-in">
+            <div class="invoice-header">
+                <div>
+                    <div class="invoice-title">Peace Angel Foundation</div>
+                    <p style="color:#666;">Decentralized War Insurance Policy</p>
+                </div>
+                <div class="invoice-stamp">🕊️</div>
+            </div>
+            <div class="success-icon">✅</div>
+            <p style="color:#333;margin:10px 0;" data-key="invoice_id_label">Policy Number:</p>
+            <div class="invoice-id" id="invoiceId">--</div>
+            <div class="invoice-details">
+                <div class="invoice-row"><strong data-key="invoice_name">Insured Name</strong><span id="invoiceName">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_email">Email</strong><span id="invoiceEmail">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_amount">Amount Paid</strong><span id="invoiceAmount">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_currency">Currency</strong><span id="invoiceCurrency">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_country">Country</strong><span id="invoiceCountry">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_value">Home Value</strong><span id="invoiceValue">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_area">Area</strong><span id="invoiceArea">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_rooms">Rooms</strong><span id="invoiceRooms">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_year">Year Built</strong><span id="invoiceYearBuilt">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_location">Coordinates</strong><span id="invoiceLocation">--</span></div>
+                <div class="invoice-row"><strong data-key="invoice_date">Date Issued</strong><span id="invoiceDate">--</span></div>
+            </div>
+            <div class="invoice-actions">
+                <button class="btn-print" onclick="window.print()">🖨️ Print</button>
+                <button class="btn-pdf" onclick="downloadPDF()">📄 Save as PDF</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section section-darker" id="faq">
+        <h2 class="section-title" data-aos="fade-up" data-key="faq_title">FAQ</h2>
+        <div class="faq-container" data-aos="fade-up">
+            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q1">What does war insurance cover?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a1">Damages from bombings, missiles, artillery, and armed conflicts within insured territory.</p></div></div>
+            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q2">How are claims processed?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a2">Verified via decentralized oracles using trusted news sources and satellite data.</p></div></div>
+            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q3">Why connect my wallet?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a3">Your wallet is your identity and payment method on the blockchain.</p></div></div>
+            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q4">Is my data safe?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a4">Yes. No personal data is stored on any server. Everything is local.</p></div></div>
+        </div>
+    </section>
+
+    <!-- MY POLICIES -->
+    <section class="section section-gradient" id="policies">
+        <h2 class="section-title" data-aos="fade-up" data-key="policies_title">My Policies</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-key="policies_subtitle">Policies saved in your browser.</p>
+        <div id="policiesList" data-aos="fade-up"><p style="text-align:center;color:var(--text2);" data-key="policies_empty">No policies yet.</p></div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer><p>&copy; 2026 Peace Angel Foundation — All Rights Reserved. | PAE Token on Polygon</p></footer>
+
+    <!-- SCRIPTS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+    <script>
+        AOS.init({ duration: 800, once: false });
+
+        const CONFIG = {
+            RECIPIENT_WALLET: '0x1234567890123456789012345678901234567890',
+            PAE_TOKEN_ADDRESS: '0x1234567890123456789012345678901234567890',
+            USDT_TOKEN_ADDRESS: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+            POLYGON_CHAIN_ID: 137
+        };
+
+        let currentLang = 'en', userAddress = null, selectedPayment = null, yearlyPremium = 0;
+        let selectedLat = null, selectedLng = null, mapPicker = null, mapMarker = null;
+
+        const translations = {
+            en: {
+                nav_home:"Home",nav_about:"About",nav_insurance:"Insurance",nav_faq:"FAQ",nav_policies:"My Policies",
+                connect_wallet:"Connect Wallet",connected_wallet:"Connected",
+                hero_title:"Decentralized War Insurance",hero_desc:"The world's first blockchain-based war insurance protocol. Protect your home against bombings and armed conflicts. Pay with crypto.",
+                hero_btn:"Get Insured Now",hero_learn:"Learn More",
+                stat_decentralized:"Decentralized",stat_instant:"Instant Claims",stat_countries:"Countries",
+                map_title:"Covered Countries",map_hint:"Hover over gold countries",
+                about_title:"Why Peace Angel?",about_subtitle:"Borderless, trustless insurance.",
+                about_card1_title:"Fully On-Chain",about_card1_desc:"Stored on Polygon. Immutable.",
+                about_card2_title:"Instant Payout",about_card2_desc:"Smart contracts auto-release funds.",
+                about_card3_title:"Global Access",about_card3_desc:"Anyone, anywhere.",
+                about_card4_title:"PAE Token",about_card4_desc:"Pay with PAE, get 20% off.",
+                about_card5_title:"Low Premiums",about_card5_desc:"Up to 60% cheaper.",
+                about_card6_title:"Privacy First",about_card6_desc:"No KYC. Wallet = Identity.",
+                form_title:"Get Your Insurance",form_subtitle:"All fields mandatory.",
+                label_country:"Country *",label_house_value:"Home Value (USD) *",label_area:"Area (m²) *",
+                label_rooms:"Number of Rooms *",label_year:"Year Built *",
+                label_location:"Home Location (click map) *",label_name:"Full Name *",label_email:"Email *",
+                calc_btn:"Calculate Premium",result_annual:"Annual Premium:",
+                result_monthly:"Monthly:",result_rate:"Risk Rate",result_value:"Home Value",
+                pay_btn:"Pay Now",
+                invoice_title:"Policy Issued!",invoice_id_label:"Policy Number:",
+                invoice_name:"Insured Name",invoice_email:"Email",invoice_amount:"Amount Paid",
+                invoice_currency:"Currency",invoice_country:"Country",invoice_value:"Home Value",
+                invoice_area:"Area",invoice_rooms:"Rooms",invoice_year:"Year Built",
+                invoice_location:"Coordinates",invoice_date:"Date Issued",
+                new_insurance:"Get Another Insurance",
+                faq_title:"FAQ",faq_q1:"Coverage?",faq_a1:"Bombings, missiles, armed conflicts.",
+                faq_q2:"Claims?",faq_a2:"Verified via oracles.",
+                faq_q3:"Why wallet?",faq_a3:"Identity + payment.",
+                faq_q4:"Data safe?",faq_a4:"All local. No server.",
+                policies_title:"My Policies",policies_subtitle:"Saved in browser.",
+                policies_empty:"No policies yet.",
+                alert_country:"Select country.",alert_value:"Enter valid home value.",
+                alert_area:"Enter area.",alert_rooms:"Enter room count.",
+                alert_year:"Enter valid year (1900-2026).",alert_location:"Select location on map.",
+                alert_name:"Enter full name.",alert_email:"Enter valid email.",
+                alert_payment:"Select payment method.",
+                processing:"Processing...",tx_confirmed:"✅ Confirmed!",
+                countries:{
+                    "AF":{name:"Afghanistan",rate:0.05},"SY":{name:"Syria",rate:0.05},
+                    "YE":{name:"Yemen",rate:0.05},"UA":{name:"Ukraine",rate:0.04},
+                    "IQ":{name:"Iraq",rate:0.04},"SD":{name:"Sudan",rate:0.04},
+                    "MM":{name:"Myanmar",rate:0.03},"NG":{name:"Nigeria",rate:0.03},
+                    "PK":{name:"Pakistan",rate:0.02},"EG":{name:"Egypt",rate:0.02},
+                    "IR":{name:"Iran",rate:0.01},"TR":{name:"Turkey",rate:0.01},
+                    "DE":{name:"Germany",rate:0.005},"FR":{name:"France",rate:0.005},
+                    "CH":{name:"Switzerland",rate:0.005}
+                }
+            },
+            ar: {
+                nav_home:"الرئيسية",nav_about:"من نحن",nav_insurance:"التأمين",nav_faq:"الأسئلة",nav_policies:"وثائقي",
+                connect_wallet:"ربط المحفظة",connected_wallet:"متصل",
+                hero_title:"تأمين حرب لامركزي",hero_desc:"أول بروتوكول تأمين حرب على البلوكتشين.",
+                hero_btn:"احصل على التأمين",hero_learn:"اعرف المزيد",
+                stat_decentralized:"لامركزي",stat_instant:"تعويض فوري",stat_countries:"دولة",
+                map_title:"الدول المغطاة",map_hint:"مرر فوق الدول الذهبية",
+                about_title:"لماذا ملاك السلام؟",about_subtitle:"تأمين بلا حدود.",
+                about_card1_title:"على السلسلة",about_card1_desc:"مخزن على بوليجون.",
+                about_card2_title:"تعويض فوري",about_card2_desc:"العقود الذكية تحرر الأموال.",
+                about_card3_title:"عالمي",about_card3_desc:"أي شخص في أي مكان.",
+                about_card4_title:"رمز PAE",about_card4_desc:"خصم 20% مع PAE.",
+                about_card5_title:"أقساط منخفضة",about_card5_desc:"أقل حتى 60%.",
+                about_card6_title:"خصوصية",about_card6_desc:"لا حاجة للهوية.",
+                form_title:"احصل على تأمينك",form_subtitle:"جميع الحقول إلزامية.",
+                label_country:"البلد *",label_house_value:"قيمة المنزل *",label_area:"المساحة *",
+                label_rooms:"عدد الغرف *",label_year:"سنة البناء *",
+                label_location:"الموقع (انقر على الخريطة) *",label_name:"الاسم الكامل *",label_email:"البريد *",
+                calc_btn:"احسب",result_annual:"القسط السنوي:",
+                result_monthly:"شهري:",result_rate:"المخاطرة",result_value:"القيمة",
+                pay_btn:"ادفع الآن",
+                invoice_title:"تم الإصدار!",invoice_id_label:"رقم الوثيقة:",
+                invoice_name:"الاسم",invoice_email:"البريد",invoice_amount:"المبلغ",
+                invoice_currency:"العملة",invoice_country:"البلد",invoice_value:"القيمة",
+                invoice_area:"المساحة",invoice_rooms:"الغرف",invoice_year:"السنة",
+                invoice_location:"الإحداثيات",invoice_date:"التاريخ",
+                new_insurance:"تأمين جديد",
+                faq_title:"أسئلة",faq_q1:"التغطية؟",faq_a1:"القصف والصواريخ.",
+                faq_q2:"المطالبات؟",faq_a2:"التحقق عبر أوراكلات.",
+                faq_q3:"لماذا المحفظة؟",faq_a3:"هوية + دفع.",
+                faq_q4:"البيانات آمنة؟",faq_a4:"كل شيء محلي.",
+                policies_title:"وثائقي",policies_subtitle:"محفوظة في المتصفح.",
+                policies_empty:"لا توجد وثائق.",
+                alert_country:"اختر البلد.",alert_value:"قيمة غير صحيحة.",
+                alert_area:"أدخل المساحة.",alert_rooms:"أدخل عدد الغرف.",
+                alert_year:"سنة غير صحيحة.",alert_location:"حدد الموقع.",
+                alert_name:"أدخل الاسم.",alert_email:"بريد غير صحيح.",
+                alert_payment:"اختر طريقة الدفع.",
+                processing:"جاري...",tx_confirmed:"✅ تم!",
+                countries:{
+                    "AF":{name:"أفغانستان",rate:0.05},"SY":{name:"سوريا",rate:0.05},
+                    "YE":{name:"اليمن",rate:0.05},"UA":{name:"أوكرانيا",rate:0.04},
+                    "IQ":{name:"العراق",rate:0.04},"SD":{name:"السودان",rate:0.04},
+                    "MM":{name:"ميانمار",rate:0.03},"NG":{name:"نيجيريا",rate:0.03},
+                    "PK":{name:"باكستان",rate:0.02},"EG":{name:"مصر",rate:0.02},
+                    "IR":{name:"إيران",rate:0.01},"TR":{name:"تركيا",rate:0.01},
+                    "DE":{name:"ألمانيا",rate:0.005},"FR":{name:"فرنسا",rate:0.005},
+                    "CH":{name:"سويسرا",rate:0.005}
+                }
+            },
+            fr: {
+                nav_home:"Accueil",nav_about:"À propos",nav_insurance:"Assurance",nav_faq:"FAQ",nav_policies:"Polices",
+                connect_wallet:"Connecter",connected_wallet:"Connecté",
+                hero_title:"Assurance Guerre",hero_desc:"Protégez votre maison avec la blockchain.",
+                hero_btn:"S'assurer",hero_learn:"En savoir plus",
+                stat_decentralized:"Décentralisé",stat_instant:"Instantané",stat_countries:"Pays",
+                map_title:"Pays couverts",map_hint:"Survolez les pays dorés",
+                about_title:"Pourquoi Peace Angel?",about_subtitle:"Assurance sans frontières.",
+                about_card1_title:"On-Chain",about_card1_desc:"Stocké sur Polygon.",
+                about_card2_title:"Paiement Instantané",about_card2_desc:"Smart contracts automatiques.",
+                about_card3_title:"Mondial",about_card3_desc:"N'importe qui, n'importe où.",
+                about_card4_title:"Token PAE",about_card4_desc:"-20% avec PAE.",
+                about_card5_title:"Primes Réduites",about_card5_desc:"Jusqu'à -60%.",
+                about_card6_title:"Confidentialité",about_card6_desc:"Pas de KYC.",
+                form_title:"Votre Assurance",form_subtitle:"Tous les champs obligatoires.",
+                label_country:"Pays *",label_house_value:"Valeur (USD) *",label_area:"Surface (m²) *",
+                label_rooms:"Nombre de pièces *",label_year:"Année *",
+                label_location:"Localisation (carte) *",label_name:"Nom complet *",label_email:"Email *",
+                calc_btn:"Calculer",result_annual:"Prime annuelle:",
+                result_monthly:"Mensuel:",result_rate:"Risque",result_value:"Valeur",
+                pay_btn:"Payer",
+                invoice_title:"Police Émise!",invoice_id_label:"N° Police:",
+                invoice_name:"Nom",invoice_email:"Email",invoice_amount:"Montant",
+                invoice_currency:"Devise",invoice_country:"Pays",invoice_value:"Valeur",
+                invoice_area:"Surface",invoice_rooms:"Pièces",invoice_year:"Année",
+                invoice_location:"Coordonnées",invoice_date:"Date",
+                new_insurance:"Nouvelle",
+                faq_title:"FAQ",faq_q1:"Couverture?",faq_a1:"Bombardements, missiles.",
+                faq_q2:"Réclamations?",faq_a2:"Vérifiées par oracles.",
+                faq_q3:"Portefeuille?",faq_a3:"Identité + paiement.",
+                faq_q4:"Données?",faq_a4:"100% local.",
+                policies_title:"Mes Polices",policies_subtitle:"Sauvegardées localement.",
+                policies_empty:"Aucune police.",
+                alert_country:"Sélectionnez un pays.",alert_value:"Valeur invalide.",
+                alert_area:"Entrez la surface.",alert_rooms:"Entrez le nombre.",
+                alert_year:"Année invalide.",alert_location:"Sélectionnez sur la carte.",
+                alert_name:"Entrez le nom.",alert_email:"Email invalide.",
+                alert_payment:"Choisissez le paiement.",
+                processing:"Traitement...",tx_confirmed:"✅ Confirmé!",
+                countries:{
+                    "AF":{name:"Afghanistan",rate:0.05},"SY":{name:"Syrie",rate:0.05},
+                    "YE":{name:"Yémen",rate:0.05},"UA":{name:"Ukraine",rate:0.04},
+                    "IQ":{name:"Irak",rate:0.04},"SD":{name:"Soudan",rate:0.04},
+                    "MM":{name:"Myanmar",rate:0.03},"NG":{name:"Nigéria",rate:0.03},
+                    "PK":{name:"Pakistan",rate:0.02},"EG":{name:"Égypte",rate:0.02},
+                    "IR":{name:"Iran",rate:0.01},"TR":{name:"Turquie",rate:0.01},
+                    "DE":{name:"Allemagne",rate:0.005},"FR":{name:"France",rate:0.005},
+                    "CH":{name:"Suisse",rate:0.005}
+                }
+            }
+        };
+
+        // Particles
+        const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+        function rc(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}rc();window.addEventListener('resize',rc);
+        const pa=[];for(let i=0;i<40;i++)pa.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.2+0.4,dx:(Math.random()-0.5)*0.4,dy:(Math.random()-0.5)*0.4});
+        function dp(){ctx.clearRect(0,0,canvas.width,canvas.height);pa.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(255,215,0,0.25)';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1;});requestAnimationFrame(dp);}dp();
+
+        // Header scroll
+        window.addEventListener('scroll',()=>{document.getElementById('mainHeader').classList.toggle('scrolled',window.scrollY>50);});
+
+        // FAQ
+        function toggleFaq(el){el.parentElement.classList.toggle('open');}
+
+        // Map Picker
+        function initMapPicker(){
+            if(mapPicker)return;
+            mapPicker=L.map('mapPicker',{center:[30,40],zoom:3,zoomControl:true});
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(mapPicker);
+            mapPicker.on('click',function(e){
+                selectedLat=e.latlng.lat.toFixed(6);selectedLng=e.latlng.lng.toFixed(6);
+                document.getElementById('latitude').value=selectedLat;
+                document.getElementById('longitude').value=selectedLng;
+                document.getElementById('coordinatesDisplay').textContent='Lat: '+selectedLat+' | Lng: '+selectedLng;
+                if(mapMarker)mapPicker.removeLayer(mapMarker);
+                mapMarker=L.marker([selectedLat,selectedLng]).addTo(mapPicker).bindPopup('Home Location').openPopup();
+                document.getElementById('locationError').classList.remove('show');
+            });
+            setTimeout(()=>mapPicker.invalidateSize(),200);
+        }
+
+        // Wallet Modal
+        function openWalletModal(){document.getElementById('walletModal').classList.add('active');}
+        function closeWalletModal(e){if(!e||e.target===document.getElementById('walletModal'))document.getElementById('walletModal').classList.remove('active');}
+        async function connectMetaMask(){
+            if(!window.ethereum){alert('MetaMask not installed.');return;}
+            try{
+                const accounts=await window.ethereum.request({method:'eth_requestAccounts'});
+                userAddress=accounts[0];updateWalletButton();closeWalletModal();
+            }catch(err){console.error(err);}
+        }
+        async function connectWalletConnect(){
+            alert('WalletConnect: Open your Trust Wallet or compatible wallet and scan the QR code.\n(Full WalletConnect integration requires a backend. This is a demo placeholder.)');
+            closeWalletModal();
+        }
+        if(window.ethereum){window.ethereum.on('accountsChanged',(acc)=>{userAddress=acc[0]||null;updateWalletButton();});}
+        function updateWalletButton(){
+            const btn=document.getElementById('connectWalletBtn');
+            if(userAddress){btn.textContent='Connected: '+userAddress.substring(0,6)+'...'+userAddress.substring(38);btn.classList.add('connected');}
+            else{btn.textContent=translations[currentLang].connect_wallet||'Connect Wallet';btn.classList.remove('connected');}
+        }
+
+        // Language
+        function switchLang(lang){
+            currentLang=lang;
+            document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+            document.querySelectorAll('.lang-btn').forEach(b=>{if(b.textContent.trim().toLowerCase()===lang.toLowerCase())b.classList.add('active');});
+            document.body.classList.toggle('rtl',lang==='ar');
+            document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
+            document.querySelectorAll('[data-key]').forEach(el=>{const k=el.getAttribute('data-key');if(translations[lang]&&translations[lang][k])el.textContent=translations[lang][k];});
+            updateWalletButton();buildCountryDropdown();loadMyPolicies();
+        }
+
+        function buildCountryDropdown(){
+            const s=document.getElementById('country');
+            const c=translations[currentLang].countries;
+            const d={en:"-- Select --",ar:"-- اختر --",fr:"-- Choisir --"};
+            s.innerHTML='<option value="">'+d[currentLang]+'</option>';
+            for(const[k,v]of Object.entries(c)){const o=document.createElement('option');o.value=v.rate;o.textContent=v.name+' ('+(v.rate*100).toFixed(1)+'%)';s.appendChild(o);}
+        }
+
+        // Validation
+        function validateForm(){
+            const t=translations[currentLang];let valid=true;
+            document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('show'));
+            if(!document.getElementById('country').value){alert(t.alert_country);valid=false;}
+            else if(!document.getElementById('houseValue').value||parseInt(document.getElementById('houseValue').value)<1000){alert(t.alert_value);valid=false;}
+            else if(!document.getElementById('area').value||parseInt(document.getElementById('area').value)<10){alert(t.alert_area);valid=false;}
+            else if(!document.getElementById('rooms').value||parseInt(document.getElementById('rooms').value)<1){alert(t.alert_rooms);valid=false;}
+            else if(!document.getElementById('yearBuilt').value||parseInt(document.getElementById('yearBuilt').value)<1900||parseInt(document.getElementById('yearBuilt').value)>2026){alert(t.alert_year);valid=false;}
+            else if(!selectedLat||!selectedLng){document.getElementById('locationError').classList.add('show');alert(t.alert_location);valid=false;}
+            else if(!document.getElementById('fullName').value.trim()){alert(t.alert_name);valid=false;}
+            else if(!document.getElementById('email').value||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value)){alert(t.alert_email);valid=false;}
+            return valid;
+        }
+
+        function calculateInsurance(){
+            if(!validateForm())return;
+            const t=translations[currentLang];
+            const rr=parseFloat(document.getElementById('country').value);
+            const hv=parseFloat(document.getElementById('houseValue').value);
+            yearlyPremium=hv*rr;
+            document.getElementById('resultAmount').textContent='$'+yearlyPremium.toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('resultDetail').textContent=t.result_rate+': '+(rr*100).toFixed(1)+'% | '+t.result_monthly+' $'+(yearlyPremium/12).toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('paePrice').textContent='$'+(yearlyPremium*0.8).toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('usdtPrice').textContent='$'+yearlyPremium.toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('resultBox').classList.add('active');
+            document.getElementById('paymentOptions').style.display='flex';
+            selectedPayment=null;
+            document.getElementById('paeCard').classList.remove('selected');
+            document.getElementById('usdtCard').classList.remove('selected');
+            document.getElementById('payBtn').classList.remove('active');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'center'});
+        }
+
+        function selectPayment(m){selectedPayment=m;document.getElementById('paeCard').classList.toggle('selected',m==='PAE');document.getElementById('usdtCard').classList.toggle('selected',m==='USDT');document.getElementById('payBtn').classList.add('active');}
+
+        function executePayment(){
+            const t=translations[currentLang];
+            if(!selectedPayment){alert(t.alert_payment);return;}
+            if(!validateForm())return;
+            const amount=selectedPayment==='PAE'?yearlyPremium*0.8:yearlyPremium;
+            const btn=document.getElementById('payBtn');btn.disabled=true;btn.innerHTML='<span class="loading-spinner"></span> '+t.processing;
+            setTimeout(()=>{
+                const policyNumber='PAE-'+Math.random().toString(36).substring(2,10).toUpperCase()+'-'+Date.now().toString(36).toUpperCase();
+                const data={
+                    policyNumber,amount,currency:selectedPayment,
+                    country:document.getElementById('country').selectedOptions[0]?.text||'N/A',
+                    houseValue:document.getElementById('houseValue').value,
+                    area:document.getElementById('area').value,
+                    rooms:document.getElementById('rooms').value,
+                    yearBuilt:document.getElementById('yearBuilt').value,
+                    lat:selectedLat,lng:selectedLng,
+                    fullName:document.getElementById('fullName').value,
+                    email:document.getElementById('email').value,
+                    date:new Date().toISOString()
+                };
+                document.getElementById('formContainer').style.display='none';
+                const inv=document.getElementById('invoiceContainer');inv.style.display='block';
+                document.getElementById('invoiceId').textContent=policyNumber;
+                document.getElementById('invoiceName').textContent=data.fullName;
+                document.getElementById('invoiceEmail').textContent=data.email;
+                document.getElementById('invoiceAmount').textContent='$'+amount.toLocaleString('en-US',{maximumFractionDigits:0});
+                document.getElementById('invoiceCurrency').textContent=data.currency;
+                document.getElementById('invoiceCountry').textContent=data.country;
+                document.getElementById('invoiceValue').textContent='$'+parseInt(data.houseValue).toLocaleString('en-US');
+                document.getElementById('invoiceArea').textContent=data.area+' m²';
+                document.getElementById('invoiceRooms').textContent=data.rooms;
+                document.getElementById('invoiceYearBuilt').textContent=data.yearBuilt;
+                document.getElementById('invoiceLocation').textContent=data.lat+', '+data.lng;
+                document.getElementById('invoiceDate').textContent=new Date(data.date).toLocaleDateString();
+                inv.scrollIntoView({behavior:'smooth',block:'center'});
+                const policies=JSON.parse(localStorage.getItem('pae_policies')||'{}');
+                policies[policyNumber]=data;localStorage.setItem('pae_policies',JSON.stringify(policies));
+                btn.disabled=false;btn.innerHTML=t.tx_confirmed;loadMyPolicies();
+            },2000);
+        }
+
+        function downloadPDF(){window.print();}
+
+        function loadMyPolicies(){
+            const t=translations[currentLang];
+            const policies=JSON.parse(localStorage.getItem('pae_policies')||'{}');
+            const div=document.getElementById('policiesList');
+            const keys=Object.keys(policies);
+            if(keys.length===0){div.innerHTML='<p style="text-align:center;color:var(--text2);">'+t.policies_empty+'</p>';return;}
+            let h='<table class="policies-table"><tr><th>Policy #</th><th>Name</th><th>Amount</th><th>Country</th><th>Date</th></tr>';
+            keys.forEach(k=>{const p=policies[k];h+='<tr><td style="color:var(--gold);">'+k+'</td><td>'+p.fullName+'</td><td>$'+parseInt(p.amount).toLocaleString('en-US')+'</td><td>'+p.country+'</td><td>'+new Date(p.date).toLocaleDateString()+'</td></tr>';});
+            h+='</table>';div.innerHTML=h;
+        }
+
+        // Init
+        buildCountryDropdown();loadMyPolicies();
+        setTimeout(initMapPicker,500);
+        window.addEventListener('resize',()=>{if(mapPicker)mapPicker.invalidateSize();});
+        console.log('🕊️ Peace Angel Foundation v3.0 - Ready');
+    </script>
+</body>
+</html>
