@@ -4,230 +4,491 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Peace Angel Foundation | Decentralized War Insurance</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- AOS -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
         :root {
-            --bg: #080c17; --bg2: #0d1229; --bg3: #111830;
-            --gold: #ffd700; --gold2: #ffaa00;
-            --text: #ffffff; --text2: #aaaacc;
-            --card: rgba(20, 25, 45, 0.85); --border: rgba(255, 215, 0, 0.25);
-            --green: #27ae60;
-            --shadow-gold: 0 0 40px rgba(255,215,0,0.35);
+            --bg-primary: #06080d;
+            --bg-secondary: #0a0e17;
+            --bg-card: rgba(15, 20, 35, 0.7);
+            --gold-400: #f0c850;
+            --gold-500: #e8b830;
+            --gold-600: #c49a20;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --green-500: #10b981;
+            --red-500: #ef4444;
+            --blue-500: #3b82f6;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-gold: rgba(240,200,80,0.3);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+            --shadow-gold: 0 0 40px rgba(240,200,80,0.2);
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 22px;
+            --radius-xl: 28px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-heading: 'Playfair Display', Georgia, serif;
+            --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Courier New', monospace;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
-            background-color: var(--bg); color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.7; overflow-x: hidden; width: 100%;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.65;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
         body.rtl { direction: rtl; }
 
+        /* ============ CUSTOM SCROLLBAR ============ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--gold-600); border-radius: 3px; }
+
+        /* ============ PARTICLES ============ */
         #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 
-        /* ============ HEADER ============ */
+        /* ============ HEADER (Glassmorphism) ============ */
         header {
-            background: rgba(10,15,31,0.96); backdrop-filter: blur(20px);
-            padding: 10px 4%; display: flex; align-items: center;
-            justify-content: space-between; border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 1000; flex-wrap: wrap; gap: 10px; width: 100%;
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(10, 14, 23, 0.75);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0 5%;
+            height: 68px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px;
+            transition: all var(--transition);
         }
+        header.scrolled { height: 58px; background: rgba(10, 14, 23, 0.92); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
-        .logo-img { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; }
-        .logo-text { font-size: 1.1em; font-weight: bold; color: var(--gold); white-space: nowrap; }
-        nav { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        nav a { color: var(--text2); text-decoration: none; font-size: 0.85em; transition: all 0.3s; padding: 5px 0; white-space: nowrap; position: relative; }
-        nav a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--gold); transition: width 0.3s; }
-        nav a:hover { color: var(--gold); }
+        .logo-img { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            border: 2px solid var(--gold-500);
+            box-shadow: 0 0 16px rgba(240,200,80,0.3);
+            object-fit: cover; transition: all var(--transition);
+        }
+        .logo-img:hover { transform: scale(1.08); }
+        .logo-text { 
+            font-family: var(--font-heading);
+            font-size: 1.3em; font-weight: 700; color: var(--gold-500);
+            letter-spacing: 0.5px;
+        }
+        nav { display: flex; align-items: center; gap: 20px; }
+        nav a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.88em; font-weight: 500;
+            transition: color var(--transition); position: relative;
+            padding: 6px 0;
+        }
+        nav a::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 0; height: 2px; background: var(--gold-500);
+            transition: width var(--transition);
+        }
+        nav a:hover { color: var(--text-primary); }
         nav a:hover::after { width: 100%; }
-        .lang-switch { display: flex; gap: 4px; }
-        .lang-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: all 0.3s; }
-        .lang-btn.active { background: var(--gold); color: var(--bg); border-color: var(--gold); font-weight: bold; }
-        .wallet-btn { background: linear-gradient(135deg, #ffd700, #ffaa00); color: var(--bg); font-weight: bold; padding: 9px 18px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.8em; transition: all 0.3s; white-space: nowrap; animation: glow-btn 2s infinite; }
-        @keyframes glow-btn { 0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.5); } 50% { box-shadow: 0 0 30px rgba(255,215,0,0.8); } }
-        .wallet-btn.connected { background: var(--green); color: white; animation: none; }
-        .wallet-btn:hover { transform: scale(1.05); }
-        .disconnect-btn { background: #e74c3c; color: white; font-weight: bold; padding: 9px 18px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.8em; transition: all 0.3s; display: none; margin-left: 8px; }
-        .disconnect-btn.show { display: inline-block; }
-        .disconnect-btn:hover { transform: scale(1.05); }
-        .wallet-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
-        .wallet-modal.active { display: flex; }
-        .wallet-modal-content { background: var(--bg2); border: 2px solid var(--gold); border-radius: 20px; padding: 30px; text-align: center; max-width: 400px; width: 90%; }
-        .wallet-option { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin: 10px 0; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 15px; }
-        .wallet-option:hover { border-color: var(--gold); background: rgba(255,215,0,0.1); }
-        .wallet-option img { width: 40px; height: 40px; }
+        .lang-switch { display: flex; gap: 3px; }
+        .lang-btn {
+            background: transparent; border: 1px solid var(--border-subtle);
+            color: var(--text-secondary); padding: 6px 11px; border-radius: 20px;
+            cursor: pointer; font-size: 0.73em; font-weight: 600; transition: all var(--transition);
+        }
+        .lang-btn.active { background: var(--gold-500); color: var(--bg-primary); border-color: var(--gold-500); }
+        .lang-btn:hover { border-color: var(--gold-500); color: var(--gold-500); }
+        .lang-btn.active:hover { color: var(--bg-primary); }
+        .btn-wallet {
+            background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+            color: var(--bg-primary); font-weight: 700; padding: 9px 20px;
+            border: none; border-radius: 24px; cursor: pointer;
+            font-size: 0.82em; transition: all var(--transition); white-space: nowrap;
+            font-family: var(--font-body); box-shadow: 0 0 18px rgba(240,200,80,0.2);
+        }
+        .btn-wallet:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(240,200,80,0.4); }
+        .btn-wallet.connected { background: var(--green-500); box-shadow: 0 0 18px rgba(16,185,129,0.2); }
+        .btn-disconnect {
+            background: transparent; border: 1px solid var(--red-500); color: var(--red-500);
+            font-weight: 600; padding: 8px 16px; border-radius: 24px;
+            cursor: pointer; font-size: 0.78em; transition: all var(--transition);
+            display: none; font-family: var(--font-body);
+        }
+        .btn-disconnect.show { display: inline-block; }
+        .btn-disconnect:hover { background: var(--red-500); color: white; }
+
+        /* Wallet Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+            z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--bg-secondary); border: 1px solid var(--border-gold);
+            border-radius: var(--radius-lg); padding: 32px; text-align: center;
+            max-width: 420px; width: 90%; box-shadow: var(--shadow-lg);
+        }
+        .modal-card h3 { font-family: var(--font-heading); color: var(--gold-500); margin-bottom: 20px; font-size: 1.4em; }
+        .wallet-option {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 14px; margin: 10px 0;
+            cursor: pointer; transition: all var(--transition);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .wallet-option:hover { border-color: var(--gold-500); background: rgba(240,200,80,0.06); }
+        .wallet-option img { width: 38px; height: 38px; border-radius: 8px; }
+        .wallet-option span { font-weight: 600; font-size: 0.95em; }
 
         /* ============ SECTIONS ============ */
-        .section { position: relative; z-index: 1; padding: 60px 4%; width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .section-dark { background-color: var(--bg); }
-        .section-darker { background-color: var(--bg2); }
-        .section-gradient { background: linear-gradient(135deg, var(--bg) 0%, var(--bg3) 50%, var(--bg) 100%); }
-        .section-title { text-align: center; color: var(--gold); font-size: clamp(1.5em, 4vw, 2.2em); margin-bottom: 12px; }
-        .section-title::after { content: ''; display: block; width: 60px; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 12px auto 0; }
-        .section-subtitle { text-align: center; color: var(--text2); font-size: 1em; max-width: 600px; margin: 0 auto 30px; padding: 0 10px; }
+        .section { position: relative; z-index: 1; padding: 80px 5%; width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .section-dark { background: var(--bg-primary); }
+        .section-alt { background: var(--bg-secondary); }
+        .section-hero {
+            background: radial-gradient(ellipse at 50% 0%, rgba(240,200,80,0.08) 0%, transparent 60%),
+                        var(--bg-primary);
+            min-height: 90vh; justify-content: center; padding-top: 100px;
+        }
+        .section-label {
+            text-transform: uppercase; letter-spacing: 3px; font-size: 0.75em;
+            color: var(--gold-500); font-weight: 700; margin-bottom: 12px;
+        }
+        .section-title {
+            font-family: var(--font-heading); font-size: clamp(2em, 5vw, 3em);
+            color: var(--text-primary); text-align: center; margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .section-title .gold { color: var(--gold-500); }
+        .section-subtitle {
+            color: var(--text-secondary); text-align: center; font-size: 1.1em;
+            max-width: 600px; margin: 0 auto 48px; line-height: 1.7;
+        }
 
         /* ============ HERO ============ */
-        .hero { text-align: center; }
-        .hero h1 { font-size: clamp(1.8em, 5vw, 2.8em); color: var(--gold); margin-bottom: 15px; animation: fadeInDown 1s ease; }
-        .hero p { font-size: clamp(0.9em, 2vw, 1.15em); color: var(--text2); max-width: 700px; margin: 0 auto 25px; animation: fadeInUp 1s ease 0.3s both; padding: 0 10px; }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        .hero-icon { font-size: clamp(3em, 8vw, 5em); animation: float 3s ease-in-out infinite; margin-bottom: 15px; }
-        .btn-gold { background: linear-gradient(135deg, #ffd700, #ffaa00); color: var(--bg); font-weight: bold; padding: clamp(12px, 2vw, 16px) clamp(30px, 5vw, 50px); border: none; border-radius: 50px; font-size: clamp(0.9em, 2vw, 1.05em); cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
-        .btn-gold:hover { transform: translateY(-3px); box-shadow: var(--shadow-gold); }
-        .btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); font-weight: bold; padding: clamp(10px, 2vw, 14px) clamp(25px, 4vw, 40px); border-radius: 50px; font-size: clamp(0.85em, 1.8vw, 1em); cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; margin-left: 10px; }
-        .btn-outline:hover { background: rgba(255,215,0,0.1); transform: translateY(-3px); }
+        .hero-content { text-align: center; max-width: 800px; }
+        .hero-badge {
+            display: inline-block; background: rgba(240,200,80,0.1);
+            border: 1px solid var(--border-gold); border-radius: 50px;
+            padding: 8px 20px; font-size: 0.85em; color: var(--gold-500);
+            margin-bottom: 24px; font-weight: 500; animation: fadeInDown 0.8s ease;
+        }
+        .hero-title { font-family: var(--font-heading); font-size: clamp(2.4em, 6vw, 3.8em); line-height: 1.15; margin-bottom: 20px; animation: fadeInDown 0.8s ease 0.15s both; }
+        .hero-title .gold { color: var(--gold-500); }
+        .hero-desc { font-size: 1.15em; color: var(--text-secondary); max-width: 600px; margin: 0 auto 32px; line-height: 1.8; animation: fadeInUp 0.8s ease 0.3s both; }
+        .hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; animation: fadeInUp 0.8s ease 0.45s both; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+            color: var(--bg-primary); font-weight: 700; padding: 15px 36px;
+            border-radius: 50px; font-size: 1em; text-decoration: none;
+            transition: all var(--transition); display: inline-block;
+            box-shadow: 0 0 30px rgba(240,200,80,0.25);
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 0 45px rgba(240,200,80,0.4); }
+        .btn-secondary {
+            background: transparent; border: 2px solid var(--text-secondary);
+            color: var(--text-primary); font-weight: 600; padding: 13px 34px;
+            border-radius: 50px; font-size: 1em; text-decoration: none;
+            transition: all var(--transition); display: inline-block;
+        }
+        .btn-secondary:hover { border-color: var(--gold-500); color: var(--gold-500); transform: translateY(-3px); }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ============ STATS ============ */
-        .stats-row { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: clamp(15px, 3vw, 25px); text-align: center; min-width: clamp(100px, 20vw, 160px); transition: all 0.3s; }
-        .stat-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-gold); }
-        .stat-number { font-size: clamp(1.5em, 4vw, 2.3em); color: var(--gold); font-weight: bold; }
-        .stat-label { color: var(--text2); margin-top: 5px; font-size: 0.85em; }
+        /* Stats */
+        .stats-grid { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-top: 56px; }
+        .stat-item { text-align: center; }
+        .stat-value { font-family: var(--font-heading); font-size: 2.6em; color: var(--gold-500); font-weight: 700; }
+        .stat-label { color: var(--text-secondary); font-size: 0.9em; margin-top: 4px; }
 
-        /* ============ WORLD MAP SVG ============ */
-        .world-map-container { max-width: 900px; width: 100%; margin: 30px auto; text-align: center; }
-        .world-map-container svg { width: 100%; height: auto; }
-        .country-bg { fill: #151d35; stroke: #2a3050; stroke-width: 0.8; }
-        .country-covered { fill: rgba(255,215,0,0.3); stroke: #ffd700; stroke-width: 1.5; cursor: pointer; transition: all 0.3s; }
-        .country-covered:hover { fill: rgba(255,215,0,0.6); filter: drop-shadow(0 0 8px rgba(255,215,0,0.6)); }
-        .country-label { fill: white; font-size: 7px; font-weight: bold; pointer-events: none; text-anchor: middle; }
+        /* ============ WORLD MAP ============ */
+        .map-wrapper { max-width: 900px; width: 100%; margin: 0 auto; }
+        .map-wrapper svg { width: 100%; height: auto; }
+        .map-bg { fill: #0f1423; stroke: #1e2640; stroke-width: 0.6; }
+        .map-covered { fill: rgba(240,200,80,0.28); stroke: #f0c850; stroke-width: 1.2; cursor: pointer; transition: all var(--transition); }
+        .map-covered:hover { fill: rgba(240,200,80,0.55); filter: drop-shadow(0 0 10px rgba(240,200,80,0.5)); }
+        .map-label { fill: #fff; font-size: 6.5px; font-weight: 700; text-anchor: middle; pointer-events: none; font-family: var(--font-body); }
+
+        /* ============ HOW IT WORKS ============ */
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; max-width: 1000px; width: 100%; }
+        .step-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg); padding: 32px 24px; text-align: center;
+            transition: all var(--transition); position: relative; overflow: hidden;
+        }
+        .step-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold-500), transparent);
+            opacity: 0; transition: opacity var(--transition);
+        }
+        .step-card:hover::before { opacity: 1; }
+        .step-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-gold); border-color: var(--border-gold); }
+        .step-number {
+            display: inline-flex; width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(240,200,80,0.12); color: var(--gold-500);
+            align-items: center; justify-content: center;
+            font-family: var(--font-heading); font-size: 1.5em; font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .step-card h3 { font-family: var(--font-heading); color: var(--text-primary); margin-bottom: 8px; font-size: 1.2em; }
+        .step-card p { color: var(--text-secondary); font-size: 0.9em; line-height: 1.7; }
 
         /* ============ FORM ============ */
-        .form-container { max-width: 700px; width: 100%; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: clamp(20px, 4vw, 35px); backdrop-filter: blur(10px); }
-        .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .form-container {
+            max-width: 720px; width: 100%; margin: 0 auto;
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl); padding: 36px;
+            backdrop-filter: blur(12px);
+        }
+        .progress-bar {
+            display: flex; gap: 0; margin-bottom: 32px; position: relative;
+        }
+        .progress-step {
+            flex: 1; text-align: center; position: relative; z-index: 1;
+            font-size: 0.8em; color: var(--text-muted); font-weight: 600;
+            cursor: pointer; transition: color var(--transition);
+        }
+        .progress-step.active { color: var(--gold-500); }
+        .progress-step.done { color: var(--green-500); }
+        .progress-dot {
+            width: 14px; height: 14px; border-radius: 50%; background: var(--border-subtle);
+            margin: 0 auto 8px; transition: all var(--transition);
+        }
+        .progress-step.active .progress-dot { background: var(--gold-500); box-shadow: 0 0 12px rgba(240,200,80,0.5); }
+        .progress-step.done .progress-dot { background: var(--green-500); }
+        .progress-line {
+            position: absolute; top: 6px; left: 0; width: 100%; height: 2px;
+            background: var(--border-subtle); z-index: 0;
+        }
+        .progress-fill {
+            height: 100%; background: var(--gold-500); transition: width var(--transition);
+            border-radius: 2px;
+        }
+        .form-step { display: none; }
+        .form-step.active { display: block; animation: fadeInUp 0.4s ease; }
+        .form-row { display: flex; gap: 16px; flex-wrap: wrap; }
         .form-row .form-group { flex: 1; min-width: 200px; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; color: var(--text2); margin-bottom: 6px; font-weight: bold; font-size: 0.9em; }
-        label .required { color: #e74c3c; }
-        select, input, textarea { width: 100%; padding: 12px 15px; background-color: #141929; border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; color: white; font-size: 0.95em; font-family: inherit; transition: all 0.3s; }
-        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
-        .map-picker { width: 100%; height: clamp(200px, 40vw, 300px); border-radius: 10px; border: 1px solid rgba(255,215,0,0.3); overflow: hidden; margin-bottom: 10px; }
-        .coordinates-display { background: #141929; padding: 8px 15px; border-radius: 8px; color: var(--gold); font-size: 0.85em; text-align: center; margin-top: 5px; }
-        .calculate-btn, .pay-btn { width: 100%; background: linear-gradient(135deg, #ffd700, #ffaa00); color: var(--bg); font-weight: bold; padding: 15px; border: none; border-radius: 12px; font-size: 1.05em; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
-        .calculate-btn:hover, .pay-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
-        .pay-btn { background: var(--green); color: white; display: none; }
-        .pay-btn.active { display: block; }
-        .pay-btn:disabled { background: #555; cursor: not-allowed; transform: none; }
-        .result-box { margin-top: 20px; padding: 20px; background: rgba(255,215,0,0.08); border: 1px solid var(--gold); border-radius: 15px; text-align: center; display: none; animation: fadeInUp 0.5s ease; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; color: var(--text-secondary); margin-bottom: 6px; font-size: 0.85em; font-weight: 600; }
+        label .req { color: var(--red-500); }
+        input, select, textarea {
+            width: 100%; padding: 13px 16px; background: rgba(20,28,45,0.8);
+            border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+            color: var(--text-primary); font-size: 0.95em; font-family: var(--font-body);
+            transition: all var(--transition);
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--gold-500);
+            box-shadow: 0 0 0 3px rgba(240,200,80,0.1);
+        }
+        .map-picker {
+            width: 100%; height: 260px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle); overflow: hidden; margin-bottom: 10px;
+        }
+        .coords-display {
+            background: rgba(20,28,45,0.8); padding: 10px 16px; border-radius: var(--radius-sm);
+            color: var(--gold-500); font-size: 0.85em; text-align: center;
+            font-family: var(--font-mono);
+        }
+        .btn-form {
+            width: 100%; background: linear-gradient(135deg, var(--gold-500), var(--gold-600));
+            color: var(--bg-primary); font-weight: 700; padding: 15px;
+            border: none; border-radius: var(--radius-sm); font-size: 1em;
+            cursor: pointer; transition: all var(--transition); font-family: var(--font-body);
+        }
+        .btn-form:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(240,200,80,0.3); }
+        .btn-form:disabled { background: #4a5568; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-outline-form {
+            width: 100%; background: transparent; border: 1px solid var(--border-subtle);
+            color: var(--text-secondary); font-weight: 600; padding: 13px;
+            border-radius: var(--radius-sm); font-size: 0.9em; cursor: pointer;
+            transition: all var(--transition); margin-top: 10px; font-family: var(--font-body);
+        }
+        .btn-outline-form:hover { border-color: var(--gold-500); color: var(--gold-500); }
+
+        /* Result Box */
+        .result-box {
+            margin-top: 20px; padding: 24px; background: rgba(240,200,80,0.06);
+            border: 1px solid var(--border-gold); border-radius: var(--radius-md);
+            text-align: center; display: none; animation: fadeInUp 0.4s ease;
+        }
         .result-box.active { display: block; }
-        .result-amount { font-size: 1.8em; color: var(--gold); font-weight: bold; }
-        .result-detail { color: var(--text2); margin: 6px 0; font-size: 0.9em; }
-        .payment-options { margin-top: 15px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .payment-card { background: rgba(20,25,45,0.9); border: 2px solid var(--border); border-radius: 14px; padding: 18px; text-align: center; cursor: pointer; transition: all 0.3s; min-width: clamp(120px, 25vw, 160px); flex: 1; }
-        .payment-card.selected { border-color: var(--gold); background: rgba(255,215,0,0.15); box-shadow: 0 0 30px rgba(255,215,0,0.2); }
-        .payment-card h3 { color: var(--gold); font-size: 1.1em; }
-        .payment-card .price { font-size: 1.4em; color: white; font-weight: bold; }
-        .badge { display: inline-block; background: var(--green); color: white; padding: 3px 12px; border-radius: 20px; font-size: 0.7em; margin-bottom: 8px; font-weight: bold; }
-        .error-msg { color: #e74c3c; font-size: 0.8em; margin-top: 5px; display: none; }
-        .error-msg.show { display: block; }
+        .result-premium { font-family: var(--font-heading); font-size: 2.4em; color: var(--gold-500); font-weight: 700; }
+        .result-detail { color: var(--text-secondary); margin: 6px 0; font-size: 0.9em; }
+        .payment-options { margin-top: 16px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .payment-card {
+            background: rgba(20,28,45,0.9); border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-md); padding: 20px; text-align: center;
+            cursor: pointer; transition: all var(--transition); min-width: 150px; flex: 1;
+        }
+        .payment-card.selected { border-color: var(--gold-500); background: rgba(240,200,80,0.08); box-shadow: 0 0 20px rgba(240,200,80,0.15); }
+        .payment-card h4 { color: var(--gold-500); font-family: var(--font-heading); font-size: 1.1em; }
+        .payment-card .price { font-size: 1.5em; color: var(--text-primary); font-weight: 700; }
+        .badge-discount { background: var(--green-500); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.7em; font-weight: 700; }
 
         /* ============ PAYMENT PAGE ============ */
-        .payment-page { display: none; max-width: 600px; width: 100%; margin: 0 auto; background: var(--card); border: 2px solid var(--gold); border-radius: 20px; padding: 35px; text-align: center; animation: fadeInUp 0.6s ease; }
-        .payment-page.active { display: block; }
-        .payment-qr { width: 180px; height: 180px; background: white; margin: 20px auto; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 3em; }
-        .payment-address { background: #141929; padding: 12px; border-radius: 10px; color: var(--gold); font-size: 0.8em; word-break: break-all; margin: 15px 0; }
-        .payment-timer { color: var(--text2); font-size: 1.1em; margin: 10px 0; }
-        .btn-confirm { background: var(--green); color: white; font-weight: bold; padding: 14px 40px; border: none; border-radius: 12px; font-size: 1.05em; cursor: pointer; transition: all 0.3s; margin-top: 15px; }
-        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 5px 25px rgba(39,174,96,0.5); }
-        .btn-back { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 10px 25px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .payment-page { display: none; max-width: 550px; width: 100%; margin: 0 auto; }
+        .payment-page.active { display: block; animation: fadeInUp 0.5s ease; }
+        .payment-card-lg {
+            background: var(--bg-card); border: 2px solid var(--border-gold);
+            border-radius: var(--radius-xl); padding: 32px; text-align: center;
+        }
+        .payment-card-lg h3 { font-family: var(--font-heading); color: var(--gold-500); font-size: 1.4em; margin-bottom: 20px; }
+        .qr-placeholder {
+            width: 160px; height: 160px; background: white; margin: 16px auto;
+            border-radius: var(--radius-md); display: flex; align-items: center;
+            justify-content: center; font-size: 3em;
+        }
+        .address-box {
+            background: rgba(20,28,45,0.8); padding: 12px; border-radius: var(--radius-sm);
+            color: var(--gold-500); font-family: var(--font-mono); font-size: 0.78em;
+            word-break: break-all; margin: 12px 0;
+        }
+        .timer-text { color: var(--text-secondary); font-size: 1em; margin: 10px 0; }
+        .timer-text strong { color: var(--gold-500); font-family: var(--font-mono); }
+        .btn-success {
+            background: var(--green-500); color: white; font-weight: 700; padding: 15px 36px;
+            border: none; border-radius: 50px; font-size: 1em; cursor: pointer;
+            transition: all var(--transition); font-family: var(--font-body);
+        }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(16,185,129,0.4); }
 
         /* ============ INVOICE ============ */
-        .invoice-container { max-width: 750px; width: 100%; margin: 0 auto; background: white; border-radius: 20px; padding: clamp(20px, 4vw, 40px); text-align: center; animation: fadeInUp 0.6s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.5); color: #1a1a2e; }
-        .invoice-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffd700; padding-bottom: 20px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-        .invoice-stamp { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 3px solid #ffd700; box-shadow: 0 0 25px rgba(255,215,0,0.4); flex-shrink: 0; }
-        .invoice-stamp img { width: 100%; height: 100%; object-fit: cover; }
-        .invoice-title { font-size: 1.6em; color: #1a1a2e; font-weight: bold; }
-        .invoice-id { font-size: 1.3em; color: #ffaa00; font-weight: bold; letter-spacing: 2px; padding: 10px; background: #f9f9f9; border-radius: 10px; font-family: 'Courier New', monospace; }
-        .invoice-details { text-align: left; margin: 20px 0; }
-        .invoice-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; }
-        .invoice-row strong { color: #555; }
-        .invoice-actions { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
-        .btn-print, .btn-pdf { padding: 12px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; transition: all 0.3s; border: none; font-size: 0.95em; }
-        .btn-print { background: #333; color: white; }
-        .btn-pdf { background: var(--gold); color: #1a1a2e; }
-        .btn-print:hover, .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+        .invoice-wrapper { max-width: 780px; width: 100%; margin: 0 auto; display: none; }
+        .invoice-wrapper.active { display: block; animation: fadeInUp 0.6s ease; }
+        .invoice-paper {
+            background: #ffffff; border-radius: var(--radius-lg); padding: 44px;
+            box-shadow: var(--shadow-lg); color: #1a1a2e;
+        }
+        .invoice-paper .header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 2px solid #f0c850; margin-bottom: 24px;
+            flex-wrap: wrap; gap: 16px;
+        }
+        .invoice-paper .header-row .title { font-family: var(--font-heading); font-size: 1.6em; font-weight: 700; color: #1a1a2e; }
+        .invoice-paper .stamp {
+            width: 70px; height: 70px; border-radius: 50%; overflow: hidden;
+            border: 3px solid #f0c850; box-shadow: 0 0 20px rgba(240,200,80,0.3);
+        }
+        .invoice-paper .stamp img { width: 100%; height: 100%; object-fit: cover; }
+        .invoice-paper .policy-num {
+            font-family: var(--font-mono); font-size: 1.2em; color: #c49a20;
+            font-weight: 700; letter-spacing: 1px; padding: 12px;
+            background: #f9f9f9; border-radius: var(--radius-sm); text-align: center; margin: 16px 0;
+        }
+        .invoice-paper .detail-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; font-size: 0.9em; }
+        .invoice-paper .detail-row strong { color: #555; }
+        .invoice-paper .actions { display: flex; gap: 14px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+        .btn-print { background: #1a1a2e; color: white; font-weight: 600; padding: 12px 28px; border-radius: 50px; border: none; cursor: pointer; font-size: 0.9em; transition: all var(--transition); font-family: var(--font-body); }
+        .btn-print:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .btn-pdf { background: #f0c850; color: #1a1a2e; font-weight: 700; padding: 12px 28px; border-radius: 50px; border: none; cursor: pointer; font-size: 0.9em; transition: all var(--transition); font-family: var(--font-body); }
+        .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(240,200,80,0.4); }
 
         /* ============ ABOUT ============ */
-        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1000px; width: 100%; margin: 0 auto; }
-        .about-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 25px; text-align: center; transition: all 0.3s; }
-        .about-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-gold); }
-        .about-card .icon { font-size: 2.5em; margin-bottom: 12px; }
-        .about-card h3 { color: var(--gold); margin-bottom: 8px; font-size: 1.15em; }
-        .about-card p { color: var(--text2); font-size: 0.9em; }
+        .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1000px; width: 100%; }
+        .about-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg); padding: 28px; text-align: center;
+            transition: all var(--transition);
+        }
+        .about-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-gold); border-color: var(--border-gold); }
+        .about-card .icon { font-size: 2.6em; margin-bottom: 12px; }
+        .about-card h3 { font-family: var(--font-heading); color: var(--gold-500); margin-bottom: 6px; font-size: 1.15em; }
+        .about-card p { color: var(--text-secondary); font-size: 0.88em; line-height: 1.6; }
 
         /* ============ FAQ ============ */
-        .faq-container { max-width: 700px; width: 100%; margin: 0 auto; }
-        .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
-        .faq-question { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: var(--gold); font-size: 0.95em; }
-        .faq-question:hover { background: rgba(255,215,0,0.05); }
-        .faq-question .arrow { transition: transform 0.3s; font-size: 1.1em; }
-        .faq-item.open .faq-question .arrow { transform: rotate(180deg); }
-        .faq-answer { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; color: var(--text2); font-size: 0.9em; }
-        .faq-item.open .faq-answer { max-height: 250px; padding: 0 20px 16px; }
+        .faq-list { max-width: 700px; width: 100%; margin: 0 auto; }
+        .faq-item { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); margin-bottom: 10px; overflow: hidden; transition: all var(--transition); }
+        .faq-q { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--text-primary); font-size: 0.95em; }
+        .faq-q:hover { color: var(--gold-500); }
+        .faq-q .arrow { transition: transform var(--transition); }
+        .faq-item.open .faq-q .arrow { transform: rotate(180deg); color: var(--gold-500); }
+        .faq-a { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; color: var(--text-secondary); font-size: 0.9em; }
+        .faq-item.open .faq-a { max-height: 200px; padding: 0 20px 16px; }
 
         /* ============ POLICIES ============ */
-        .policies-table { width: 100%; max-width: 800px; margin: 0 auto; border-collapse: collapse; font-size: 0.9em; }
-        .policies-table th { background: rgba(255,215,0,0.1); color: var(--gold); padding: 10px; border-bottom: 2px solid var(--gold); white-space: nowrap; }
-        .policies-table td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--text2); text-align: center; white-space: nowrap; }
-        .policies-table tr:hover td { background: rgba(255,215,0,0.03); }
-
-        /* ============ LOADING ============ */
-        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: var(--gold); animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .success-icon { font-size: 3.5em; animation: bounce 1s ease; }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-30px); } 60% { transform: translateY(-15px); } }
+        .policies-table-wrap { width: 100%; max-width: 800px; overflow-x: auto; }
+        .policies-table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+        .policies-table th { background: rgba(240,200,80,0.08); color: var(--gold-500); padding: 12px; border-bottom: 2px solid var(--gold-600); font-weight: 700; white-space: nowrap; }
+        .policies-table td { padding: 12px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); text-align: center; white-space: nowrap; }
+        .policies-table tr:hover td { background: rgba(240,200,80,0.03); }
 
         /* ============ FOOTER ============ */
-        footer { background-color: #050810; text-align: center; padding: 25px 4%; border-top: 1px solid var(--border); color: #888899; font-size: 0.85em; position: relative; z-index: 1; }
+        footer {
+            background: var(--bg-secondary); border-top: 1px solid var(--border-subtle);
+            text-align: center; padding: 32px 5%; color: var(--text-muted);
+            font-size: 0.85em; position: relative; z-index: 1;
+        }
+        footer a { color: var(--gold-500); text-decoration: none; }
+
+        /* ============ LOADING ============ */
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.2); border-radius: 50%; border-top-color: var(--gold-500); animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ============ PRINT ============ */
         @media print {
             body * { visibility: hidden; }
-            .invoice-container, .invoice-container * { visibility: visible; }
-            .invoice-container { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; }
-            .invoice-actions { display: none; }
+            .invoice-wrapper, .invoice-wrapper * { visibility: visible; }
+            .invoice-wrapper { position: absolute; left: 0; top: 0; width: 100%; }
+            .invoice-paper { box-shadow: none; border: none; }
+            .invoice-paper .actions { display: none; }
         }
 
         /* ============ MOBILE ============ */
         @media (max-width: 768px) {
-            .section { padding: 40px 3%; }
-            nav { gap: 8px; }
-            nav a { font-size: 0.75em; }
-            .wallet-btn { font-size: 0.7em; padding: 7px 14px; }
+            header { height: auto; padding: 12px 4%; flex-wrap: wrap; }
+            nav { gap: 10px; }
+            nav a { font-size: 0.78em; }
+            .section { padding: 48px 4%; }
+            .section-hero { min-height: auto; padding-top: 60px; }
+            .form-container { padding: 20px; }
             .form-row { flex-direction: column; gap: 0; }
             .form-row .form-group { min-width: 100%; }
-            .btn-outline { margin-left: 0; margin-top: 8px; display: block; }
-            .invoice-header { flex-direction: column; text-align: center; }
-            .about-grid { grid-template-columns: 1fr; }
-            .policies-table { font-size: 0.7em; }
+            .hero-title { font-size: 2em; }
+            .stats-grid { gap: 20px; }
+            .stat-value { font-size: 2em; }
+            .invoice-paper { padding: 20px; }
+            .invoice-paper .header-row { flex-direction: column; text-align: center; }
         }
         @media (max-width: 480px) {
-            .hero h1 { font-size: 1.5em; }
-            .hero p { font-size: 0.85em; }
-            .section-title { font-size: 1.3em; }
+            .hero-title { font-size: 1.6em; }
+            .section-title { font-size: 1.5em; }
+            .btn-primary, .btn-secondary { font-size: 0.85em; padding: 12px 24px; }
         }
     </style>
 </head>
 <body>
+
     <canvas id="particles"></canvas>
 
-    <!-- HEADER -->
-    <header id="mainHeader">
+    <!-- ============ HEADER ============ -->
+    <header id="header">
         <div class="logo-area">
-            <img src="https://ipfs.io/ipfs/bafybeieyjasax6wp4venevpnpu5rifwxzgi6u3wzma32ay3z2qvkrfi6iq" alt="PAE Token" class="logo-img">
+            <img src="https://ipfs.io/ipfs/bafybeieyjasax6wp4venevpnpu5rifwxzgi6u3wzma32ay3z2qvkrfi6iq" alt="PAE" class="logo-img">
             <span class="logo-text">Peace Angel</span>
         </div>
         <nav>
             <a href="#home" data-key="nav_home">Home</a>
-            <a href="#about" data-key="nav_about">About</a>
-            <a href="#insurance" data-key="nav_insurance">Insurance</a>
+            <a href="#how" data-key="nav_how">How It Works</a>
+            <a href="#insurance" data-key="nav_insurance">Get Insured</a>
             <a href="#faq" data-key="nav_faq">FAQ</a>
-            <a href="#policies" data-key="nav_policies">My Policies</a>
-            <button class="wallet-btn" id="connectWalletBtn" onclick="openWalletModal()" data-key="connect_wallet">Connect Wallet</button>
-            <button class="disconnect-btn" id="disconnectBtn" onclick="disconnectWallet()" data-key="disconnect">Disconnect</button>
+            <button class="btn-wallet" id="btnConnect" onclick="openWalletModal()" data-key="connect_wallet">Connect Wallet</button>
+            <button class="btn-disconnect" id="btnDisconnect" onclick="disconnectWallet()">Disconnect</button>
         </nav>
         <div class="lang-switch">
             <button class="lang-btn active" onclick="switchLang('en')">EN</button>
@@ -236,379 +497,268 @@
         </div>
     </header>
 
-    <!-- WALLET MODAL -->
-    <div class="wallet-modal" id="walletModal" onclick="closeWalletModal(event)">
-        <div class="wallet-modal-content" onclick="event.stopPropagation()">
-            <h3 style="color:var(--gold);margin-bottom:20px;">Connect Wallet</h3>
-            <div class="wallet-option" onclick="connectMetaMask()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask"><span>MetaMask</span>
-            </div>
-            <div class="wallet-option" onclick="connectWalletConnect()">
-                <img src="https://trustwallet.com/assets/images/favicon.png" alt="WalletConnect"><span>WalletConnect (Trust Wallet & more)</span>
-            </div>
-            <button style="margin-top:15px;background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 20px;border-radius:8px;cursor:pointer;" onclick="closeWalletModal()">Cancel</button>
+    <!-- Wallet Modal -->
+    <div class="modal-overlay" id="walletModal" onclick="closeWalletModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <h3>Connect Your Wallet</h3>
+            <div class="wallet-option" onclick="connectMetaMask()"><img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt=""><span>MetaMask</span></div>
+            <div class="wallet-option" onclick="connectWalletConnect()"><img src="https://trustwallet.com/assets/images/favicon.png" alt=""><span>WalletConnect</span></div>
+            <button class="btn-outline-form" style="margin-top:14px;" onclick="closeWalletModal()">Cancel</button>
         </div>
     </div>
 
-    <!-- HOME -->
-    <section class="section section-gradient" id="home">
-        <div class="hero" data-aos="fade-up">
-            <div class="hero-icon">🌍</div>
-            <h1 data-key="hero_title">Decentralized War Insurance</h1>
-            <p data-key="hero_desc">The world's first blockchain-based war insurance protocol. Protect your home against bombings and armed conflicts. Pay with crypto.</p>
-            <a href="#insurance" class="btn-gold" data-key="hero_btn">Get Insured Now</a>
-            <a href="#about" class="btn-outline" data-key="hero_learn">Learn More</a>
+    <!-- ============ HOME ============ -->
+    <section class="section section-hero" id="home">
+        <div class="hero-content">
+            <div class="hero-badge">🕊️ Decentralized Protection</div>
+            <h1 class="hero-title">Insurance for an <span class="gold">Uncertain</span> World</h1>
+            <p class="hero-desc">The first blockchain-powered war insurance protocol. Protect your home instantly with crypto. No borders, no bureaucracy, no discrimination.</p>
+            <div class="hero-buttons">
+                <a href="#insurance" class="btn-primary">Get Insured Now</a>
+                <a href="#how" class="btn-secondary">How It Works</a>
+            </div>
         </div>
-        <div class="stats-row">
-            <div class="stat-card" data-aos="fade-up" data-aos-delay="200"><div class="stat-number">100%</div><div class="stat-label" data-key="stat_decentralized">Decentralized</div></div>
-            <div class="stat-card" data-aos="fade-up" data-aos-delay="400"><div class="stat-number">24/7</div><div class="stat-label" data-key="stat_instant">Instant Claims</div></div>
-            <div class="stat-card" data-aos="fade-up" data-aos-delay="600"><div class="stat-number">15+</div><div class="stat-label" data-key="stat_countries">Countries</div></div>
+        <div class="stats-grid">
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="100"><div class="stat-value">100%</div><div class="stat-label">On-Chain</div></div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="200"><div class="stat-value">15+</div><div class="stat-label">Countries</div></div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="300"><div class="stat-value">24/7</div><div class="stat-label">Protection</div></div>
         </div>
-        <!-- World Map -->
-        <div class="world-map-container" data-aos="zoom-in">
-            <h3 style="color:var(--gold);margin-bottom:15px;" data-key="map_title">Covered Countries</h3>
-            <svg viewBox="0 0 1000 500" id="worldMap">
-                <!-- Ocean background -->
-                <rect width="1000" height="500" fill="#0a0f1f"/>
-                <!-- Simplified continents background -->
-                <path class="country-bg" d="M50,150 Q150,80 300,100 Q450,70 600,90 Q750,80 900,120 Q950,150 920,200 Q880,250 800,280 Q700,300 600,290 Q500,310 400,320 Q250,340 150,300 Q80,260 50,200 Z"/>
-                <path class="country-bg" d="M100,320 Q200,290 350,300 Q500,310 600,330 Q700,340 800,320 Q850,350 780,400 Q650,450 450,440 Q250,430 120,380 Z"/>
-                <!-- Covered Countries - Highlighted with borders -->
-                <!-- North America area -->
-                <path class="country-bg" d="M100,50 Q250,30 400,50 Q450,80 420,120 Q350,150 200,140 Q80,120 100,50 Z"/>
-                <!-- Europe area -->
-                <path class="country-bg" d="M420,50 Q520,30 600,50 Q620,100 580,150 Q500,170 440,140 Q400,100 420,50 Z"/>
-                <!-- Africa area -->
-                <path class="country-bg" d="M420,160 Q500,140 580,160 Q600,220 560,300 Q480,380 420,350 Q380,280 400,200 Z"/>
-                <!-- Asia area -->
-                <path class="country-bg" d="M600,50 Q750,30 880,60 Q920,120 880,200 Q800,280 700,280 Q620,240 600,160 Z"/>
-                <!-- South America -->
-                <path class="country-bg" d="M200,300 Q280,280 320,320 Q300,400 240,440 Q180,420 160,360 Z"/>
-                <!-- Australia -->
-                <path class="country-bg" d="M750,320 Q820,300 860,330 Q840,380 780,380 Q740,360 750,320 Z"/>
+    </section>
 
-                <!-- Covered Countries (Gold) -->
-                <path class="country-covered" d="M620,100 Q640,88 660,100 Q655,120 630,118 Z"/><text class="country-label" x="645" y="108">AF</text>
-                <path class="country-covered" d="M550,120 Q570,108 585,118 Q580,135 555,133 Z"/><text class="country-label" x="568" y="125">SY</text>
-                <path class="country-covered" d="M560,170 Q580,158 595,168 Q590,185 565,183 Z"/><text class="country-label" x="578" y="175">YE</text>
-                <path class="country-covered" d="M500,80 Q520,65 540,78 Q535,95 510,93 Z"/><text class="country-label" x="520" y="85">UA</text>
-                <path class="country-covered" d="M570,105 Q590,93 605,103 Q600,120 575,118 Z"/><text class="country-label" x="588" y="110">IQ</text>
-                <path class="country-covered" d="M460,220 Q480,208 500,218 Q495,235 465,233 Z"/><text class="country-label" x="482" y="225">SD</text>
-                <path class="country-covered" d="M680,140 Q700,128 720,138 Q715,155 690,153 Z"/><text class="country-label" x="700" y="145">MM</text>
-                <path class="country-covered" d="M440,190 Q460,178 475,188 Q470,205 445,203 Z"/><text class="country-label" x="458" y="195">NG</text>
-                <path class="country-covered" d="M640,80 Q660,68 675,78 Q670,95 645,93 Z"/><text class="country-label" x="658" y="85">PK</text>
-                <path class="country-covered" d="M510,140 Q530,128 545,138 Q540,155 515,153 Z"/><text class="country-label" x="528" y="145">EG</text>
-                <path class="country-covered" d="M610,75 Q630,63 645,73 Q640,90 615,88 Z"/><text class="country-label" x="628" y="80">IR</text>
-                <path class="country-covered" d="M520,95 Q540,83 555,93 Q550,110 525,108 Z"/><text class="country-label" x="538" y="100">TR</text>
-                <path class="country-covered" d="M450,55 Q470,43 485,53 Q480,70 455,68 Z"/><text class="country-label" x="468" y="60">DE</text>
-                <path class="country-covered" d="M430,65 Q450,53 465,63 Q460,80 435,78 Z"/><text class="country-label" x="448" y="70">FR</text>
-                <path class="country-covered" d="M445,45 Q465,33 480,43 Q475,60 450,58 Z"/><text class="country-label" x="463" y="50">CH</text>
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section section-alt" id="how">
+        <span class="section-label">Process</span>
+        <h2 class="section-title">How It <span class="gold">Works</span></h2>
+        <p class="section-subtitle">Three simple steps to protect your home against war damages.</p>
+        <div class="steps-grid">
+            <div class="step-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="step-number">1</div>
+                <h3>Enter Details</h3>
+                <p>Select your country, enter home value, area, and pinpoint your location on the interactive map.</p>
+            </div>
+            <div class="step-card" data-aos="fade-up" data-aos-delay="150">
+                <div class="step-number">2</div>
+                <h3>Pay with Crypto</h3>
+                <p>Choose PAE (20% off) or USDT. Connect MetaMask or Trust Wallet. Payment is instant on Polygon.</p>
+            </div>
+            <div class="step-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="step-number">3</div>
+                <h3>Get Protected</h3>
+                <p>Receive your policy number instantly. Download, print, or access anytime. Fully verifiable on-chain.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ WORLD MAP ============ -->
+    <section class="section section-dark" id="coverage">
+        <span class="section-label">Coverage</span>
+        <h2 class="section-title">Covered <span class="gold">Countries</span></h2>
+        <div class="map-wrapper" data-aos="zoom-in">
+            <svg viewBox="0 0 1000 500">
+                <rect width="1000" height="500" fill="#0a0e17"/>
+                <path class="map-bg" d="M60,160 Q160,90 320,110 Q480,80 640,100 Q800,90 930,130 Q960,170 930,220 Q890,270 800,300 Q700,320 600,310 Q480,340 380,340 Q240,360 140,320 Q70,270 60,200 Z"/>
+                <path class="map-bg" d="M120,330 Q220,300 360,320 Q500,330 620,350 Q720,360 820,340 Q870,370 800,420 Q670,470 460,460 Q250,450 130,400 Z"/>
+                <path class="map-bg" d="M120,60 Q260,40 420,60 Q540,50 620,65 Q640,120 590,170 Q510,190 450,160 Q400,120 420,60 Z"/>
+                <path class="map-bg" d="M620,65 Q760,45 890,70 Q930,130 890,200 Q810,290 710,300 Q630,260 610,170 Z"/>
+                <path class="map-bg" d="M210,310 Q290,290 330,330 Q310,410 250,450 Q190,430 170,370 Z"/>
+                <path class="map-bg" d="M760,330 Q830,310 870,340 Q850,390 790,390 Q750,370 760,330 Z"/>
+
+                <path class="map-covered" d="M630,110 Q652,98 672,110 Q667,132 642,130 Z"/><text class="map-label" x="652" y="118">AF</text>
+                <path class="map-covered" d="M558,128 Q578,116 593,126 Q588,144 563,142 Z"/><text class="map-label" x="576" y="134">SY</text>
+                <path class="map-covered" d="M568,178 Q588,166 603,176 Q598,194 573,192 Z"/><text class="map-label" x="586" y="184">YE</text>
+                <path class="map-covered" d="M508,88 Q528,76 543,86 Q538,104 513,102 Z"/><text class="map-label" x="526" y="94">UA</text>
+                <path class="map-covered" d="M578,113 Q598,101 613,111 Q608,129 583,127 Z"/><text class="map-label" x="596" y="119">IQ</text>
+                <path class="map-covered" d="M468,230 Q488,218 508,228 Q503,246 473,244 Z"/><text class="map-label" x="490" y="236">SD</text>
+                <path class="map-covered" d="M688,148 Q708,136 728,146 Q723,164 698,162 Z"/><text class="map-label" x="708" y="154">MM</text>
+                <path class="map-covered" d="M448,200 Q468,188 483,198 Q478,216 453,214 Z"/><text class="map-label" x="466" y="206">NG</text>
+                <path class="map-covered" d="M648,88 Q668,76 683,86 Q678,104 653,102 Z"/><text class="map-label" x="666" y="94">PK</text>
+                <path class="map-covered" d="M518,148 Q538,136 553,146 Q548,164 523,162 Z"/><text class="map-label" x="536" y="154">EG</text>
+                <path class="map-covered" d="M618,83 Q638,71 653,81 Q648,99 623,97 Z"/><text class="map-label" x="636" y="89">IR</text>
+                <path class="map-covered" d="M528,103 Q548,91 563,101 Q558,119 533,117 Z"/><text class="map-label" x="546" y="109">TR</text>
+                <path class="map-covered" d="M460,63 Q480,51 495,61 Q490,79 465,77 Z"/><text class="map-label" x="478" y="69">DE</text>
+                <path class="map-covered" d="M440,73 Q460,61 475,71 Q470,89 445,87 Z"/><text class="map-label" x="458" y="79">FR</text>
+                <path class="map-covered" d="M455,53 Q475,41 490,51 Q485,69 460,67 Z"/><text class="map-label" x="473" y="59">CH</text>
             </svg>
-            <p style="color:var(--text2);font-size:0.8em;margin-top:8px;" data-key="map_hint">Gold countries are covered. Hover to highlight.</p>
         </div>
     </section>
 
-    <!-- ABOUT -->
-    <section class="section section-darker" id="about">
-        <h2 class="section-title" data-aos="fade-up" data-key="about_title">Why Peace Angel?</h2>
-        <p class="section-subtitle" data-aos="fade-up" data-key="about_subtitle">Borderless, trustless insurance.</p>
-        <div class="about-grid">
-            <div class="about-card" data-aos="zoom-in" data-aos-delay="100"><div class="icon">🔗</div><h3 data-key="about_card1_title">On-Chain</h3><p data-key="about_card1_desc">Stored on Polygon. Immutable.</p></div>
-            <div class="about-card" data-aos="zoom-in" data-aos-delay="200"><div class="icon">⚡</div><h3 data-key="about_card2_title">Instant</h3><p data-key="about_card2_desc">Smart contracts auto-release.</p></div>
-            <div class="about-card" data-aos="zoom-in" data-aos-delay="300"><div class="icon">🌍</div><h3 data-key="about_card3_title">Global</h3><p data-key="about_card3_desc">Anyone, anywhere.</p></div>
-            <div class="about-card" data-aos="zoom-in" data-aos-delay="400"><div class="icon">🛡️</div><h3 data-key="about_card4_title">PAE Token</h3><p data-key="about_card4_desc">20% discount with PAE.</p></div>
-            <div class="about-card" data-aos="zoom-in" data-aos-delay="500"><div class="icon">💰</div><h3 data-key="about_card5_title">Low Premiums</h3><p data-key="about_card5_desc">Up to 60% cheaper.</p></div>
-            <div class="about-card" data-aos="zoom-in" data-aos-delay="600"><div class="icon">🔐</div><h3 data-key="about_card6_title">Privacy</h3><p data-key="about_card6_desc">No KYC. Wallet = ID.</p></div>
-        </div>
-    </section>
+    <!-- ============ INSURANCE FORM ============ -->
+    <section class="section section-alt" id="insurance">
+        <span class="section-label">Get Insured</span>
+        <h2 class="section-title">Your <span class="gold">Policy</span></h2>
+        <p class="section-subtitle">Fill in the details below. All fields are mandatory.</p>
+        
+        <div class="form-container" id="formContainer">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-line"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+                <div class="progress-step active" id="step1ind"><div class="progress-dot"></div>Details</div>
+                <div class="progress-step" id="step2ind"><div class="progress-dot"></div>Review</div>
+                <div class="progress-step" id="step3ind"><div class="progress-dot"></div>Pay</div>
+            </div>
 
-    <!-- INSURANCE -->
-    <section class="section section-gradient" id="insurance">
-        <h2 class="section-title" data-aos="fade-up" data-key="form_title">Get Your Insurance</h2>
-        <p class="section-subtitle" data-aos="fade-up" data-key="form_subtitle">All fields mandatory.</p>
-        <div class="form-container" id="formContainer" data-aos="fade-up">
-            <div class="form-group"><label data-key="label_country">Country <span class="required">*</span></label><select id="country"></select></div>
-            <div class="form-row">
-                <div class="form-group"><label data-key="label_house_value">Home Value (USD) <span class="required">*</span></label><input type="number" id="houseValue" placeholder="e.g. 100000" min="1000"></div>
-                <div class="form-group"><label data-key="label_area">Area (m²) <span class="required">*</span></label><input type="number" id="area" placeholder="e.g. 120" min="10"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label data-key="label_rooms">Rooms <span class="required">*</span></label><input type="number" id="rooms" placeholder="e.g. 3" min="1" max="20"></div>
-                <div class="form-group"><label data-key="label_year">Year Built <span class="required">*</span></label><input type="number" id="yearBuilt" placeholder="e.g. 2015" min="1900" max="2026"></div>
-            </div>
-            <div class="form-group">
-                <label data-key="label_location">Home Location (click map) <span class="required">*</span></label>
-                <div class="map-picker" id="mapPicker"></div>
-                <div class="coordinates-display" id="coordinatesDisplay">Lat: -- | Lng: --</div>
-                <input type="hidden" id="latitude"><input type="hidden" id="longitude">
-                <div class="error-msg" id="locationError" data-key="error_location">Please select your home location.</div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label data-key="label_name">Full Name <span class="required">*</span></label><input type="text" id="fullName" placeholder="John Doe"></div>
-                <div class="form-group"><label data-key="label_email">Email <span class="required">*</span></label><input type="email" id="email" placeholder="john@example.com"></div>
-            </div>
-            <button class="calculate-btn" onclick="calculateInsurance()" data-key="calc_btn">Calculate Premium</button>
-
-            <div class="result-box" id="resultBox">
-                <p style="color:#aaaacc;" data-key="result_annual">Annual Premium:</p>
-                <p class="result-amount" id="resultAmount">--</p>
-                <p class="result-detail" id="resultDetail"></p>
-                <div class="payment-options" id="paymentOptions" style="display:none;">
-                    <div class="payment-card" id="paeCard" onclick="selectPayment('PAE')"><span class="badge">-20%</span><h3>PAE</h3><p class="price" id="paePrice">--</p></div>
-                    <div class="payment-card" id="usdtCard" onclick="selectPayment('USDT')"><h3>USDT</h3><p class="price" id="usdtPrice">--</p></div>
+            <!-- Step 1: Details -->
+            <div class="form-step active" id="step1">
+                <div class="form-group"><label data-key="label_country">Country <span class="req">*</span></label><select id="country"></select></div>
+                <div class="form-row">
+                    <div class="form-group"><label data-key="label_house_value">Home Value (USD) <span class="req">*</span></label><input type="number" id="houseValue" placeholder="100,000" min="1000"></div>
+                    <div class="form-group"><label data-key="label_area">Area (m²) <span class="req">*</span></label><input type="number" id="area" placeholder="120" min="10"></div>
                 </div>
-                <button class="pay-btn" id="payBtn" onclick="goToPayment()">Proceed to Payment</button>
+                <div class="form-row">
+                    <div class="form-group"><label data-key="label_rooms">Rooms <span class="req">*</span></label><input type="number" id="rooms" placeholder="3" min="1" max="20"></div>
+                    <div class="form-group"><label data-key="label_year">Year Built <span class="req">*</span></label><input type="number" id="yearBuilt" placeholder="2015" min="1900" max="2026"></div>
+                </div>
+                <div class="form-group">
+                    <label data-key="label_location">Home Location (click map) <span class="req">*</span></label>
+                    <div class="map-picker" id="mapPicker"></div>
+                    <div class="coords-display" id="coordsDisplay">📍 Click on the map to select your home location</div>
+                    <input type="hidden" id="latitude"><input type="hidden" id="longitude">
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label data-key="label_name">Full Name <span class="req">*</span></label><input type="text" id="fullName" placeholder="John Doe"></div>
+                    <div class="form-group"><label data-key="label_email">Email <span class="req">*</span></label><input type="email" id="email" placeholder="john@example.com"></div>
+                </div>
+                <button class="btn-form" onclick="goToStep2()">Calculate Premium →</button>
             </div>
-        </div>
 
-        <!-- PAYMENT PAGE -->
-        <div class="payment-page" id="paymentPage">
-            <h3 style="color:var(--gold);margin-bottom:15px;" data-key="payment_title">Complete Your Payment</h3>
-            <p data-key="payment_amount">Amount: <strong id="paymentAmount" style="color:var(--gold);">--</strong></p>
-            <p data-key="payment_currency">Currency: <strong id="paymentCurrency" style="color:var(--gold);">--</strong></p>
-            <div class="payment-qr">📱<br><small style="font-size:0.3em;">Scan QR</small></div>
-            <p style="color:var(--text2);font-size:0.8em;" data-key="payment_qr_hint">Scan with your wallet app</p>
-            <div class="payment-address" id="paymentAddress">0x1234...5678</div>
-            <p class="payment-timer" data-key="payment_timer">Complete within: <strong id="timerDisplay">10:00</strong></p>
-            <button class="btn-confirm" onclick="confirmPayment()" data-key="payment_confirm">I Have Paid</button>
-            <button class="btn-back" onclick="goBackToForm()" data-key="payment_back">← Back</button>
+            <!-- Step 2: Review -->
+            <div class="form-step" id="step2">
+                <div class="result-box active" id="resultBox2">
+                    <p style="color:var(--text-secondary);">Annual Premium</p>
+                    <div class="result-premium" id="premiumDisplay">--</div>
+                    <p class="result-detail" id="premiumDetail"></p>
+                    <div class="payment-options" id="paymentOptions">
+                        <div class="payment-card" id="cardPAE" onclick="selectPayment('PAE')">
+                            <span class="badge-discount">-20%</span>
+                            <h4>PAE Token</h4>
+                            <div class="price" id="pricePAE">--</div>
+                        </div>
+                        <div class="payment-card" id="cardUSDT" onclick="selectPayment('USDT')">
+                            <h4>USDT</h4>
+                            <div class="price" id="priceUSDT">--</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-form" id="btnGoToPay" onclick="goToStep3()" disabled>Proceed to Payment →</button>
+                <button class="btn-outline-form" onclick="goToStep1()">← Back</button>
+            </div>
+
+            <!-- Step 3: Payment -->
+            <div class="form-step" id="step3">
+                <div class="payment-page active" id="paymentPage">
+                    <div class="payment-card-lg">
+                        <h3>Complete Payment</h3>
+                        <p style="color:var(--text-secondary);">Amount: <strong style="color:var(--gold-500);" id="payAmount">--</strong></p>
+                        <p style="color:var(--text-secondary);">Currency: <strong style="color:var(--gold-500);" id="payCurrency">--</strong></p>
+                        <div class="qr-placeholder">📱</div>
+                        <p style="color:var(--text-muted);font-size:0.8em;">Scan with wallet app</p>
+                        <div class="address-box" id="payAddress">0x1234...5678</div>
+                        <p class="timer-text">Time remaining: <strong id="timerDisplay">10:00</strong></p>
+                        <button class="btn-success" onclick="confirmPayment()">✅ I Have Paid</button>
+                        <button class="btn-outline-form" onclick="goToStep2()">← Back</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- INVOICE -->
-        <div class="invoice-container" id="invoiceContainer" style="display:none;" data-aos="zoom-in">
-            <div class="invoice-header">
-                <div>
-                    <div class="invoice-title">Peace Angel Foundation</div>
-                    <p style="color:#666;">Decentralized War Insurance Policy</p>
+        <div class="invoice-wrapper" id="invoiceWrapper">
+            <div class="invoice-paper">
+                <div class="header-row">
+                    <div>
+                        <div class="title">Peace Angel Foundation</div>
+                        <p style="color:#666;font-size:0.9em;">Decentralized War Insurance Policy</p>
+                    </div>
+                    <div class="stamp"><img src="https://ipfs.io/ipfs/bafybeieyjasax6wp4venevpnpu5rifwxzgi6u3wzma32ay3z2qvkrfi6iq" alt="PAE Stamp"></div>
                 </div>
-                <div class="invoice-stamp">
-                    <img src="https://ipfs.io/ipfs/bafybeieyjasax6wp4venevpnpu5rifwxzgi6u3wzma32ay3z2qvkrfi6iq" alt="PAE Stamp">
+                <p style="text-align:center;color:#555;font-weight:600;">Policy Number</p>
+                <div class="policy-num" id="invPolicyNum">--</div>
+                <div style="margin-top:20px;">
+                    <div class="detail-row"><strong>Insured Name</strong><span id="invName">--</span></div>
+                    <div class="detail-row"><strong>Email</strong><span id="invEmail">--</span></div>
+                    <div class="detail-row"><strong>Amount Paid</strong><span id="invAmount">--</span></div>
+                    <div class="detail-row"><strong>Currency</strong><span id="invCurrency">--</span></div>
+                    <div class="detail-row"><strong>Country</strong><span id="invCountry">--</span></div>
+                    <div class="detail-row"><strong>Home Value</strong><span id="invValue">--</span></div>
+                    <div class="detail-row"><strong>Area</strong><span id="invArea">--</span></div>
+                    <div class="detail-row"><strong>Rooms</strong><span id="invRooms">--</span></div>
+                    <div class="detail-row"><strong>Year Built</strong><span id="invYear">--</span></div>
+                    <div class="detail-row"><strong>Location</strong><span id="invCoords">--</span></div>
+                    <div class="detail-row"><strong>Date Issued</strong><span id="invDate">--</span></div>
                 </div>
-            </div>
-            <div class="success-icon">✅</div>
-            <p style="color:#333;margin:10px 0;" data-key="invoice_id_label">Policy Number:</p>
-            <div class="invoice-id" id="invoiceId">--</div>
-            <div class="invoice-details">
-                <div class="invoice-row"><strong data-key="invoice_name">Insured</strong><span id="invoiceName">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_email">Email</strong><span id="invoiceEmail">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_amount">Amount</strong><span id="invoiceAmount">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_currency">Currency</strong><span id="invoiceCurrency">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_country">Country</strong><span id="invoiceCountry">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_value">Home Value</strong><span id="invoiceValue">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_area">Area</strong><span id="invoiceArea">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_rooms">Rooms</strong><span id="invoiceRooms">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_year">Year Built</strong><span id="invoiceYearBuilt">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_location">Coordinates</strong><span id="invoiceLocation">--</span></div>
-                <div class="invoice-row"><strong data-key="invoice_date">Date</strong><span id="invoiceDate">--</span></div>
-            </div>
-            <div class="invoice-actions no-print">
-                <button class="btn-print" onclick="printInvoice()">🖨️ Print Invoice</button>
-                <button class="btn-pdf" onclick="printInvoice()">📄 Save as PDF</button>
+                <div class="actions">
+                    <button class="btn-print" onclick="printInvoice()">🖨️ Print</button>
+                    <button class="btn-pdf" onclick="printInvoice()">📄 Save PDF</button>
+                    <button class="btn-outline-form" style="width:auto;padding:12px 28px;" onclick="resetAll()">New Policy</button>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- FAQ -->
-    <section class="section section-darker" id="faq">
-        <h2 class="section-title" data-aos="fade-up" data-key="faq_title">FAQ</h2>
-        <div class="faq-container" data-aos="fade-up">
-            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q1">Coverage?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a1">Bombings, missiles, armed conflicts.</p></div></div>
-            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q2">Claims?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a2">Verified via decentralized oracles.</p></div></div>
-            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q3">Why wallet?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a3">Identity + payment on blockchain.</p></div></div>
-            <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span data-key="faq_q4">Data safe?</span><span class="arrow">▼</span></div><div class="faq-answer"><p data-key="faq_a4">100% local. No server.</p></div></div>
+    <!-- ============ ABOUT ============ -->
+    <section class="section section-dark" id="about">
+        <span class="section-label">Why Us</span>
+        <h2 class="section-title">Why <span class="gold">Peace Angel?</span></h2>
+        <div class="about-grid">
+            <div class="about-card" data-aos="fade-up"><div class="icon">🔗</div><h3>Fully On-Chain</h3><p>All policies stored immutably on Polygon.</p></div>
+            <div class="about-card" data-aos="fade-up" data-aos-delay="100"><div class="icon">⚡</div><h3>Instant Claims</h3><p>Smart contracts auto-release verified claims.</p></div>
+            <div class="about-card" data-aos="fade-up" data-aos-delay="200"><div class="icon">🌍</div><h3>Borderless</h3><p>Anyone, anywhere. No discrimination.</p></div>
+            <div class="about-card" data-aos="fade-up" data-aos-delay="300"><div class="icon">🛡️</div><h3>PAE Token</h3><p>20% discount. Ecosystem-powered.</p></div>
+            <div class="about-card" data-aos="fade-up" data-aos-delay="400"><div class="icon">💰</div><h3>Low Premiums</h3><p>Up to 60% cheaper than traditional.</p></div>
+            <div class="about-card" data-aos="fade-up" data-aos-delay="500"><div class="icon">🔐</div><h3>Privacy First</h3><p>No KYC. Wallet = Identity.</p></div>
         </div>
     </section>
 
-    <!-- MY POLICIES -->
-    <section class="section section-gradient" id="policies">
-        <h2 class="section-title" data-aos="fade-up" data-key="policies_title">My Policies</h2>
-        <p class="section-subtitle" data-aos="fade-up" data-key="policies_subtitle">Saved in browser.</p>
-        <div id="policiesList" data-aos="fade-up"><p style="text-align:center;color:var(--text2);" data-key="policies_empty">No policies yet.</p></div>
+    <!-- ============ FAQ ============ -->
+    <section class="section section-alt" id="faq">
+        <span class="section-label">Support</span>
+        <h2 class="section-title">Frequently <span class="gold">Asked</span></h2>
+        <div class="faq-list">
+            <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What damages are covered?<span class="arrow">▼</span></div><div class="faq-a">Bombings, missile attacks, artillery fire, and armed conflicts within the insured territory.</div></div>
+            <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How are claims verified?<span class="arrow">▼</span></div><div class="faq-a">Through decentralized oracles pulling data from trusted news sources and satellite imagery.</div></div>
+            <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Why crypto payment?<span class="arrow">▼</span></div><div class="faq-a">Fast, borderless, and censorship-resistant. Perfect for high-risk regions.</div></div>
+            <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Is my data safe?<span class="arrow">▼</span></div><div class="faq-a">Yes. Everything is stored locally in your browser. No servers, no leaks.</div></div>
+        </div>
     </section>
 
-    <footer><p>&copy; 2026 Peace Angel Foundation — PAE Token on Polygon</p></footer>
+    <!-- ============ MY POLICIES ============ -->
+    <section class="section section-dark" id="policies">
+        <span class="section-label">Portfolio</span>
+        <h2 class="section-title">My <span class="gold">Policies</span></h2>
+        <p class="section-subtitle">Locally saved in your browser.</p>
+        <div class="policies-table-wrap" id="policiesList"><p style="text-align:center;color:var(--text-muted);">No policies yet.</p></div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer><p>&copy; 2026 <a href="#">Peace Angel Foundation</a>. All Rights Reserved. | Built on <a href="https://polygon.technology">Polygon</a></p></footer>
 
     <!-- SCRIPTS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script>
-        AOS.init({ duration: 800, once: false });
 
+    <script>
+        AOS.init({ duration: 700, once: false });
+
+        // ============ GLOBALS ============
         let currentLang = 'en', userAddress = null, selectedPayment = null, yearlyPremium = 0;
         let selectedLat = null, selectedLng = null, mapPicker = null, mapMarker = null;
-        let paymentTimer = null, timerSeconds = 600;
+        let paymentTimer = null, timerSeconds = 600, currentStep = 1;
 
-        const translations = {
-            en: {
-                nav_home:"Home",nav_about:"About",nav_insurance:"Insurance",nav_faq:"FAQ",nav_policies:"My Policies",
-                connect_wallet:"Connect Wallet",disconnect:"Disconnect",
-                hero_title:"Decentralized War Insurance",hero_desc:"The world's first blockchain-based war insurance protocol. Protect your home against bombings and armed conflicts. Pay with crypto.",
-                hero_btn:"Get Insured Now",hero_learn:"Learn More",
-                stat_decentralized:"Decentralized",stat_instant:"Instant Claims",stat_countries:"Countries",
-                map_title:"Covered Countries",map_hint:"Gold = Covered. Hover to highlight.",
-                about_title:"Why Peace Angel?",about_subtitle:"Borderless, trustless insurance.",
-                about_card1_title:"On-Chain",about_card1_desc:"Polygon. Immutable.",
-                about_card2_title:"Instant",about_card2_desc:"Auto-release.",
-                about_card3_title:"Global",about_card3_desc:"Anyone, anywhere.",
-                about_card4_title:"PAE Token",about_card4_desc:"20% off with PAE.",
-                about_card5_title:"Low Premiums",about_card5_desc:"Up to 60% cheaper.",
-                about_card6_title:"Privacy",about_card6_desc:"No KYC.",
-                form_title:"Get Your Insurance",form_subtitle:"All fields mandatory.",
-                label_country:"Country *",label_house_value:"Home Value (USD) *",label_area:"Area (m²) *",
-                label_rooms:"Rooms *",label_year:"Year Built *",label_location:"Location (click map) *",
-                label_name:"Full Name *",label_email:"Email *",
-                calc_btn:"Calculate Premium",result_annual:"Annual Premium:",
-                result_monthly:"Monthly:",result_rate:"Risk Rate",result_value:"Home Value",
-                pay_btn:"Proceed to Payment",
-                payment_title:"Complete Your Payment",payment_amount:"Amount:",
-                payment_currency:"Currency:",payment_qr_hint:"Scan QR with wallet app",
-                payment_timer:"Time remaining:",payment_confirm:"I Have Paid",payment_back:"← Back",
-                invoice_id_label:"Policy Number:",invoice_name:"Insured",invoice_email:"Email",
-                invoice_amount:"Amount",invoice_currency:"Currency",invoice_country:"Country",
-                invoice_value:"Home Value",invoice_area:"Area",invoice_rooms:"Rooms",
-                invoice_year:"Year Built",invoice_location:"Coordinates",invoice_date:"Date",
-                new_insurance:"Get Another Insurance",
-                faq_title:"FAQ",faq_q1:"Coverage?",faq_a1:"Bombings, missiles, conflicts.",
-                faq_q2:"Claims?",faq_a2:"Verified via oracles.",
-                faq_q3:"Why wallet?",faq_a3:"Identity + payment.",
-                faq_q4:"Data safe?",faq_a4:"100% local.",
-                policies_title:"My Policies",policies_subtitle:"Saved in browser.",
-                policies_empty:"No policies yet.",
-                alert_country:"Select country.",alert_value:"Enter valid value.",
-                alert_area:"Enter area.",alert_rooms:"Enter rooms.",
-                alert_year:"Enter valid year.",alert_location:"Select location on map.",
-                alert_name:"Enter name.",alert_email:"Enter valid email.",
-                alert_payment:"Select payment method.",
-                processing:"Processing...",tx_confirmed:"✅ Confirmed!",
-                countries:{
-                    "AF":{name:"Afghanistan",rate:0.05},"SY":{name:"Syria",rate:0.05},
-                    "YE":{name:"Yemen",rate:0.05},"UA":{name:"Ukraine",rate:0.04},
-                    "IQ":{name:"Iraq",rate:0.04},"SD":{name:"Sudan",rate:0.04},
-                    "MM":{name:"Myanmar",rate:0.03},"NG":{name:"Nigeria",rate:0.03},
-                    "PK":{name:"Pakistan",rate:0.02},"EG":{name:"Egypt",rate:0.02},
-                    "IR":{name:"Iran",rate:0.01},"TR":{name:"Turkey",rate:0.01},
-                    "DE":{name:"Germany",rate:0.005},"FR":{name:"France",rate:0.005},
-                    "CH":{name:"Switzerland",rate:0.005}
-                }
-            },
-            ar: {
-                nav_home:"الرئيسية",nav_about:"من نحن",nav_insurance:"التأمين",nav_faq:"أسئلة",nav_policies:"وثائقي",
-                connect_wallet:"ربط",disconnect:"قطع",
-                hero_title:"تأمين حرب لامركزي",hero_desc:"أول بروتوكول تأمين حرب على البلوكتشين.",
-                hero_btn:"تأمين الآن",hero_learn:"المزيد",
-                stat_decentralized:"لامركزي",stat_instant:"فوري",stat_countries:"دولة",
-                map_title:"الدول المغطاة",map_hint:"الذهبي = مغطى",
-                about_title:"لماذا؟",about_subtitle:"تأمين بلا حدود.",
-                about_card1_title:"على السلسلة",about_card1_desc:"بوليجون",
-                about_card2_title:"فوري",about_card2_desc:"تلقائي",
-                about_card3_title:"عالمي",about_card3_desc:"أي شخص",
-                about_card4_title:"PAE",about_card4_desc:"خصم 20%",
-                about_card5_title:"أقساط",about_card5_desc:"أقل 60%",
-                about_card6_title:"خصوصية",about_card6_desc:"بدون هوية",
-                form_title:"تأمينك",form_subtitle:"كل الحقول إلزامية.",
-                label_country:"البلد *",label_house_value:"القيمة *",label_area:"المساحة *",
-                label_rooms:"غرف *",label_year:"السنة *",label_location:"الموقع *",
-                label_name:"الاسم *",label_email:"بريد *",
-                calc_btn:"احسب",result_annual:"القسط:",
-                result_monthly:"شهري:",result_rate:"خطر",result_value:"قيمة",
-                pay_btn:"ادفع",
-                payment_title:"إتمام الدفع",payment_amount:"المبلغ:",
-                payment_currency:"العملة:",payment_qr_hint:"امسح QR",
-                payment_timer:"الوقت:",payment_confirm:"دفعت",payment_back:"← رجوع",
-                invoice_id_label:"رقم:",invoice_name:"مؤمن",invoice_email:"بريد",
-                invoice_amount:"مبلغ",invoice_currency:"عملة",invoice_country:"بلد",
-                invoice_value:"قيمة",invoice_area:"مساحة",invoice_rooms:"غرف",
-                invoice_year:"سنة",invoice_location:"إحداثيات",invoice_date:"تاريخ",
-                new_insurance:"تأمين جديد",
-                faq_title:"أسئلة",faq_q1:"تغطية؟",faq_a1:"قصف وصواريخ.",
-                faq_q2:"مطالبات؟",faq_a2:"أوراكلات.",
-                faq_q3:"محفظة؟",faq_a3:"هوية+دفع.",
-                faq_q4:"أمان؟",faq_a4:"محلي 100%.",
-                policies_title:"وثائقي",policies_subtitle:"محفوظة.",
-                policies_empty:"لا وثائق.",
-                alert_country:"اختر.",alert_value:"قيمة خطأ.",
-                alert_area:"مساحة.",alert_rooms:"غرف.",
-                alert_year:"سنة خطأ.",alert_location:"حدد الموقع.",
-                alert_name:"اسم.",alert_email:"بريد خطأ.",
-                alert_payment:"اختر الدفع.",
-                processing:"جاري...",tx_confirmed:"✅ تم!",
-                countries:{
-                    "AF":{name:"أفغانستان",rate:0.05},"SY":{name:"سوريا",rate:0.05},
-                    "YE":{name:"اليمن",rate:0.05},"UA":{name:"أوكرانيا",rate:0.04},
-                    "IQ":{name:"العراق",rate:0.04},"SD":{name:"السودان",rate:0.04},
-                    "MM":{name:"ميانمار",rate:0.03},"NG":{name:"نيجيريا",rate:0.03},
-                    "PK":{name:"باكستان",rate:0.02},"EG":{name:"مصر",rate:0.02},
-                    "IR":{name:"إيران",rate:0.01},"TR":{name:"تركيا",rate:0.01},
-                    "DE":{name:"ألمانيا",rate:0.005},"FR":{name:"فرنسا",rate:0.005},
-                    "CH":{name:"سويسرا",rate:0.005}
-                }
-            },
-            fr: {
-                nav_home:"Accueil",nav_about:"À propos",nav_insurance:"Assurance",nav_faq:"FAQ",nav_policies:"Polices",
-                connect_wallet:"Connecter",disconnect:"Déconnecter",
-                hero_title:"Assurance Guerre",hero_desc:"Protégez votre maison avec la blockchain.",
-                hero_btn:"S'assurer",hero_learn:"Plus",
-                stat_decentralized:"Décentralisé",stat_instant:"Instantané",stat_countries:"Pays",
-                map_title:"Pays couverts",map_hint:"Or = Couvert",
-                about_title:"Pourquoi?",about_subtitle:"Sans frontières.",
-                about_card1_title:"On-Chain",about_card1_desc:"Polygon.",
-                about_card2_title:"Instantané",about_card2_desc:"Auto.",
-                about_card3_title:"Mondial",about_card3_desc:"Partout.",
-                about_card4_title:"PAE",about_card4_desc:"-20%",
-                about_card5_title:"Primes",about_card5_desc:"-60%",
-                about_card6_title:"Vie privée",about_card6_desc:"Pas de KYC.",
-                form_title:"Assurance",form_subtitle:"Obligatoire.",
-                label_country:"Pays *",label_house_value:"Valeur *",label_area:"Surface *",
-                label_rooms:"Pièces *",label_year:"Année *",label_location:"Lieu *",
-                label_name:"Nom *",label_email:"Email *",
-                calc_btn:"Calculer",result_annual:"Prime:",
-                result_monthly:"Mensuel:",result_rate:"Risque",result_value:"Valeur",
-                pay_btn:"Payer",
-                payment_title:"Paiement",payment_amount:"Montant:",
-                payment_currency:"Devise:",payment_qr_hint:"Scannez QR",
-                payment_timer:"Temps:",payment_confirm:"Payé",payment_back:"← Retour",
-                invoice_id_label:"N°:",invoice_name:"Assuré",invoice_email:"Email",
-                invoice_amount:"Montant",invoice_currency:"Devise",invoice_country:"Pays",
-                invoice_value:"Valeur",invoice_area:"Surface",invoice_rooms:"Pièces",
-                invoice_year:"Année",invoice_location:"Coords",invoice_date:"Date",
-                new_insurance:"Nouveau",
-                faq_title:"FAQ",faq_q1:"Couverture?",faq_a1:"Bombardements.",
-                faq_q2:"Réclamations?",faq_a2:"Oracles.",
-                faq_q3:"Portefeuille?",faq_a3:"Identité+paiement.",
-                faq_q4:"Données?",faq_a4:"100% local.",
-                policies_title:"Polices",policies_subtitle:"Sauvegardées.",
-                policies_empty:"Aucune.",
-                alert_country:"Pays.",alert_value:"Valeur.",
-                alert_area:"Surface.",alert_rooms:"Pièces.",
-                alert_year:"Année.",alert_location:"Carte.",
-                alert_name:"Nom.",alert_email:"Email.",
-                alert_payment:"Paiement.",
-                processing:"...",tx_confirmed:"✅ OK!",
-                countries:{
-                    "AF":{name:"Afghanistan",rate:0.05},"SY":{name:"Syrie",rate:0.05},
-                    "YE":{name:"Yémen",rate:0.05},"UA":{name:"Ukraine",rate:0.04},
-                    "IQ":{name:"Irak",rate:0.04},"SD":{name:"Soudan",rate:0.04},
-                    "MM":{name:"Myanmar",rate:0.03},"NG":{name:"Nigéria",rate:0.03},
-                    "PK":{name:"Pakistan",rate:0.02},"EG":{name:"Égypte",rate:0.02},
-                    "IR":{name:"Iran",rate:0.01},"TR":{name:"Turquie",rate:0.01},
-                    "DE":{name:"Allemagne",rate:0.005},"FR":{name:"France",rate:0.005},
-                    "CH":{name:"Suisse",rate:0.005}
-                }
-            }
-        };
-
-        // Particles
+        // ============ PARTICLES ============
         const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
         function rc(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}rc();window.addEventListener('resize',rc);
-        const pa=[];for(let i=0;i<40;i++)pa.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.2+0.4,dx:(Math.random()-0.5)*0.4,dy:(Math.random()-0.5)*0.4});
-        function dp(){ctx.clearRect(0,0,canvas.width,canvas.height);pa.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(255,215,0,0.25)';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1;});requestAnimationFrame(dp);}dp();
+        const pa=[];for(let i=0;i<35;i++)pa.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1+0.3,dx:(Math.random()-0.5)*0.35,dy:(Math.random()-0.5)*0.35});
+        function dp(){ctx.clearRect(0,0,canvas.width,canvas.height);pa.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(240,200,80,0.2)';ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>canvas.width)p.dx*=-1;if(p.y<0||p.y>canvas.height)p.dy*=-1;});requestAnimationFrame(dp);}dp();
 
-        window.addEventListener('scroll',()=>{document.getElementById('mainHeader').classList.toggle('scrolled',window.scrollY>50);});
+        // ============ HEADER SCROLL ============
+        window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50);});
+
+        // ============ FAQ ============
         function toggleFaq(el){el.parentElement.classList.toggle('open');}
 
-        // Map
-        function initMapPicker(){
+        // ============ MAP ============
+        function initMap(){
             if(mapPicker)return;
             mapPicker=L.map('mapPicker',{center:[30,40],zoom:3});
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OSM'}).addTo(mapPicker);
@@ -616,116 +766,102 @@
                 selectedLat=e.latlng.lat.toFixed(6);selectedLng=e.latlng.lng.toFixed(6);
                 document.getElementById('latitude').value=selectedLat;
                 document.getElementById('longitude').value=selectedLng;
-                document.getElementById('coordinatesDisplay').textContent='Lat: '+selectedLat+' | Lng: '+selectedLng;
+                document.getElementById('coordsDisplay').textContent='📍 Lat: '+selectedLat+' | Lng: '+selectedLng;
                 if(mapMarker)mapPicker.removeLayer(mapMarker);
-                mapMarker=L.marker([selectedLat,selectedLng]).addTo(mapPicker).bindPopup('📍 Home').openPopup();
-                document.getElementById('locationError').classList.remove('show');
+                mapMarker=L.marker([selectedLat,selectedLng]).addTo(mapPicker).bindPopup('🏠 Home Location').openPopup();
             });
-            setTimeout(()=>mapPicker.invalidateSize(),300);
+            setTimeout(()=>mapPicker.invalidateSize(),400);
         }
 
-        // Wallet
+        // ============ WALLET ============
         function openWalletModal(){document.getElementById('walletModal').classList.add('active');}
         function closeWalletModal(e){if(!e||e.target===document.getElementById('walletModal'))document.getElementById('walletModal').classList.remove('active');}
         async function connectMetaMask(){
-            if(!window.ethereum){alert('Install MetaMask!');return;}
+            if(!window.ethereum){alert('Please install MetaMask!');return;}
             try{const a=await window.ethereum.request({method:'eth_requestAccounts'});userAddress=a[0];updateWalletUI();closeWalletModal();}catch(e){console.error(e);}
         }
-        async function connectWalletConnect(){alert('Open Trust Wallet & scan QR.\n(Full WalletConnect needs backend.)');closeWalletModal();}
+        async function connectWalletConnect(){alert('Open Trust Wallet & scan QR.\n(WalletConnect backend required for full integration.)');closeWalletModal();}
         function disconnectWallet(){userAddress=null;updateWalletUI();}
         if(window.ethereum){window.ethereum.on('accountsChanged',(a)=>{userAddress=a[0]||null;updateWalletUI();});}
         function updateWalletUI(){
-            const b=document.getElementById('connectWalletBtn'),d=document.getElementById('disconnectBtn');
+            const b=document.getElementById('btnConnect'),d=document.getElementById('btnDisconnect');
             if(userAddress){b.textContent='✓ '+userAddress.substring(0,6)+'...'+userAddress.substring(38);b.classList.add('connected');d.classList.add('show');}
-            else{b.textContent=translations[currentLang].connect_wallet||'Connect Wallet';b.classList.remove('connected');d.classList.remove('show');}
+            else{b.textContent='Connect Wallet';b.classList.remove('connected');d.classList.remove('show');}
         }
 
-        // Language
+        // ============ LANGUAGE ============
         function switchLang(lang){
             currentLang=lang;
             document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
             document.querySelectorAll('.lang-btn').forEach(b=>{if(b.textContent.trim().toLowerCase()===lang.toLowerCase())b.classList.add('active');});
             document.body.classList.toggle('rtl',lang==='ar');
             document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
-            document.querySelectorAll('[data-key]').forEach(el=>{const k=el.getAttribute('data-key');if(translations[lang]&&translations[lang][k])el.textContent=translations[lang][k];});
             updateWalletUI();buildCountryDropdown();loadMyPolicies();
         }
-
         function buildCountryDropdown(){
-            const s=document.getElementById('country'),c=translations[currentLang].countries;
-            const d={en:"-- Select --",ar:"-- اختر --",fr:"-- Choisir --"};
-            s.innerHTML='<option value="">'+d[currentLang]+'</option>';
-            for(const[k,v]of Object.entries(c)){const o=document.createElement('option');o.value=v.rate;o.textContent=v.name+' ('+(v.rate*100).toFixed(1)+'%)';s.appendChild(o);}
+            const s=document.getElementById('country');
+            const countries={AF:"Afghanistan (5%)",SY:"Syria (5%)",YE:"Yemen (5%)",UA:"Ukraine (4%)",IQ:"Iraq (4%)",SD:"Sudan (4%)",MM:"Myanmar (3%)",NG:"Nigeria (3%)",PK:"Pakistan (2%)",EG:"Egypt (2%)",IR:"Iran (1%)",TR:"Turkey (1%)",DE:"Germany (0.5%)",FR:"France (0.5%)",CH:"Switzerland (0.5%)"};
+            const rates={AF:0.05,SY:0.05,YE:0.05,UA:0.04,IQ:0.04,SD:0.04,MM:0.03,NG:0.03,PK:0.02,EG:0.02,IR:0.01,TR:0.01,DE:0.005,FR:0.005,CH:0.005};
+            s.innerHTML='<option value="">-- Select Country --</option>';
+            for(const[k,v]of Object.entries(countries)){const o=document.createElement('option');o.value=rates[k];o.textContent=v;s.appendChild(o);}
         }
 
-        function validateForm(){
-            const t=translations[currentLang];let v=true;
-            if(!document.getElementById('country').value){alert(t.alert_country);v=false;}
-            else if(!document.getElementById('houseValue').value||parseInt(document.getElementById('houseValue').value)<1000){alert(t.alert_value);v=false;}
-            else if(!document.getElementById('area').value||parseInt(document.getElementById('area').value)<10){alert(t.alert_area);v=false;}
-            else if(!document.getElementById('rooms').value||parseInt(document.getElementById('rooms').value)<1){alert(t.alert_rooms);v=false;}
-            else if(!document.getElementById('yearBuilt').value||parseInt(document.getElementById('yearBuilt').value)<1900||parseInt(document.getElementById('yearBuilt').value)>2026){alert(t.alert_year);v=false;}
-            else if(!selectedLat||!selectedLng){document.getElementById('locationError').classList.add('show');alert(t.alert_location);v=false;}
-            else if(!document.getElementById('fullName').value.trim()){alert(t.alert_name);v=false;}
-            else if(!document.getElementById('email').value||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value)){alert(t.alert_email);v=false;}
-            return v;
+        // ============ FORM STEPS ============
+        function validateStep1(){
+            if(!document.getElementById('country').value){alert('Please select a country.');return false;}
+            if(!document.getElementById('houseValue').value||parseInt(document.getElementById('houseValue').value)<1000){alert('Enter valid home value (min $1,000).');return false;}
+            if(!document.getElementById('area').value||parseInt(document.getElementById('area').value)<10){alert('Enter valid area (min 10 m²).');return false;}
+            if(!document.getElementById('rooms').value||parseInt(document.getElementById('rooms').value)<1){alert('Enter number of rooms.');return false;}
+            if(!document.getElementById('yearBuilt').value||parseInt(document.getElementById('yearBuilt').value)<1900||parseInt(document.getElementById('yearBuilt').value)>2026){alert('Enter valid year (1900-2026).');return false;}
+            if(!selectedLat||!selectedLng){alert('Please select your home location on the map.');return false;}
+            if(!document.getElementById('fullName').value.trim()){alert('Enter your full name.');return false;}
+            if(!document.getElementById('email').value||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value)){alert('Enter a valid email.');return false;}
+            return true;
         }
-
-        function calculateInsurance(){
-            if(!validateForm())return;
-            const t=translations[currentLang];
+        function goToStep2(){
+            if(!validateStep1())return;
             const rr=parseFloat(document.getElementById('country').value),hv=parseFloat(document.getElementById('houseValue').value);
             yearlyPremium=hv*rr;
-            document.getElementById('resultAmount').textContent='$'+yearlyPremium.toLocaleString('en-US',{maximumFractionDigits:0});
-            document.getElementById('resultDetail').textContent=t.result_rate+': '+(rr*100).toFixed(1)+'% | '+t.result_monthly+' $'+(yearlyPremium/12).toLocaleString('en-US',{maximumFractionDigits:0});
-            document.getElementById('paePrice').textContent='$'+(yearlyPremium*0.8).toLocaleString('en-US',{maximumFractionDigits:0});
-            document.getElementById('usdtPrice').textContent='$'+yearlyPremium.toLocaleString('en-US',{maximumFractionDigits:0});
-            document.getElementById('resultBox').classList.add('active');
-            document.getElementById('paymentOptions').style.display='flex';
-            selectedPayment=null;
-            document.getElementById('paeCard').classList.remove('selected');
-            document.getElementById('usdtCard').classList.remove('selected');
-            document.getElementById('payBtn').classList.remove('active');
-            document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'center'});
+            document.getElementById('premiumDisplay').textContent='$'+yearlyPremium.toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('premiumDetail').textContent='Risk: '+(rr*100).toFixed(1)+'% | Monthly: $'+(yearlyPremium/12).toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('pricePAE').textContent='$'+(yearlyPremium*0.8).toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('priceUSDT').textContent='$'+yearlyPremium.toLocaleString('en-US',{maximumFractionDigits:0});
+            selectedPayment=null;document.getElementById('cardPAE').classList.remove('selected');document.getElementById('cardUSDT').classList.remove('selected');
+            document.getElementById('btnGoToPay').disabled=true;
+            switchStep(2);
         }
-
-        function selectPayment(m){selectedPayment=m;document.getElementById('paeCard').classList.toggle('selected',m==='PAE');document.getElementById('usdtCard').classList.toggle('selected',m==='USDT');document.getElementById('payBtn').classList.add('active');}
-
-        // Payment page
-        function goToPayment(){
-            const t=translations[currentLang];
-            if(!selectedPayment){alert(t.alert_payment);return;}
-            if(!validateForm())return;
+        function selectPayment(m){
+            selectedPayment=m;
+            document.getElementById('cardPAE').classList.toggle('selected',m==='PAE');
+            document.getElementById('cardUSDT').classList.toggle('selected',m==='USDT');
+            document.getElementById('btnGoToPay').disabled=false;
+        }
+        function goToStep3(){
+            if(!selectedPayment){alert('Please select a payment method.');return;}
             const amount=selectedPayment==='PAE'?yearlyPremium*0.8:yearlyPremium;
-            document.getElementById('formContainer').style.display='none';
-            document.getElementById('paymentPage').classList.add('active');
-            document.getElementById('paymentAmount').textContent='$'+amount.toLocaleString('en-US',{maximumFractionDigits:0});
-            document.getElementById('paymentCurrency').textContent=selectedPayment;
-            document.getElementById('paymentAddress').textContent='0x1234...5678';
-            document.getElementById('paymentPage').scrollIntoView({behavior:'smooth',block:'center'});
+            document.getElementById('payAmount').textContent='$'+amount.toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('payCurrency').textContent=selectedPayment;
+            switchStep(3);
             startTimer();
         }
-
-        function goBackToForm(){
-            document.getElementById('paymentPage').classList.remove('active');
-            document.getElementById('formContainer').style.display='block';
-            document.getElementById('formContainer').scrollIntoView({behavior:'smooth'});
-            clearInterval(paymentTimer);
+        function goToStep1(){switchStep(1);clearInterval(paymentTimer);}
+        function switchStep(step){
+            currentStep=step;
+            document.querySelectorAll('.form-step').forEach(s=>s.classList.remove('active'));
+            document.getElementById('step'+step).classList.add('active');
+            document.querySelectorAll('.progress-step').forEach(s=>s.classList.remove('active','done'));
+            for(let i=1;i<=3;i++){if(i<step)document.getElementById('step'+i+'ind').classList.add('done');if(i===step)document.getElementById('step'+i+'ind').classList.add('active');}
+            document.getElementById('progressFill').style.width=(step*33)+'%';
+            document.getElementById('step'+step).scrollIntoView({behavior:'smooth',block:'center'});
         }
 
-        function startTimer(){
-            timerSeconds=600;updateTimerDisplay();
-            clearInterval(paymentTimer);
-            paymentTimer=setInterval(()=>{timerSeconds--;updateTimerDisplay();if(timerSeconds<=0){clearInterval(paymentTimer);alert('Time expired!');}},1000);
-        }
-        function updateTimerDisplay(){
-            const m=Math.floor(timerSeconds/60),s=timerSeconds%60;
-            document.getElementById('timerDisplay').textContent=m+':'+(s<10?'0':'')+s;
-        }
+        // ============ TIMER ============
+        function startTimer(){timerSeconds=600;updateTimer();clearInterval(paymentTimer);paymentTimer=setInterval(()=>{timerSeconds--;updateTimer();if(timerSeconds<=0){clearInterval(paymentTimer);alert('Time expired!');}},1000);}
+        function updateTimer(){const m=Math.floor(timerSeconds/60),s=timerSeconds%60;document.getElementById('timerDisplay').textContent=m+':'+(s<10?'0':'')+s;}
 
+        // ============ CONFIRM PAYMENT ============
         function confirmPayment(){
             clearInterval(paymentTimer);
-            const t=translations[currentLang];
             const amount=selectedPayment==='PAE'?yearlyPremium*0.8:yearlyPremium;
             const policyNumber='PAE-'+Math.random().toString(36).substring(2,10).toUpperCase()+'-'+Date.now().toString(36).toUpperCase();
             const data={
@@ -740,47 +876,54 @@
                 email:document.getElementById('email').value,
                 date:new Date().toISOString()
             };
-            document.getElementById('paymentPage').classList.remove('active');
             document.getElementById('formContainer').style.display='none';
-            const inv=document.getElementById('invoiceContainer');inv.style.display='block';
-            document.getElementById('invoiceId').textContent=policyNumber;
-            document.getElementById('invoiceName').textContent=data.fullName;
-            document.getElementById('invoiceEmail').textContent=data.email;
-            document.getElementById('invoiceAmount').textContent='$'+amount.toLocaleString('en-US',{maximumFractionDigits:0});
-            document.getElementById('invoiceCurrency').textContent=data.currency;
-            document.getElementById('invoiceCountry').textContent=data.country;
-            document.getElementById('invoiceValue').textContent='$'+parseInt(data.houseValue).toLocaleString('en-US');
-            document.getElementById('invoiceArea').textContent=data.area+' m²';
-            document.getElementById('invoiceRooms').textContent=data.rooms;
-            document.getElementById('invoiceYearBuilt').textContent=data.yearBuilt;
-            document.getElementById('invoiceLocation').textContent=data.lat+', '+data.lng;
-            document.getElementById('invoiceDate').textContent=new Date(data.date).toLocaleDateString();
-            inv.scrollIntoView({behavior:'smooth',block:'center'});
+            document.getElementById('invoiceWrapper').classList.add('active');
+            document.getElementById('invPolicyNum').textContent=policyNumber;
+            document.getElementById('invName').textContent=data.fullName;
+            document.getElementById('invEmail').textContent=data.email;
+            document.getElementById('invAmount').textContent='$'+amount.toLocaleString('en-US',{maximumFractionDigits:0});
+            document.getElementById('invCurrency').textContent=data.currency;
+            document.getElementById('invCountry').textContent=data.country;
+            document.getElementById('invValue').textContent='$'+parseInt(data.houseValue).toLocaleString('en-US');
+            document.getElementById('invArea').textContent=data.area+' m²';
+            document.getElementById('invRooms').textContent=data.rooms;
+            document.getElementById('invYear').textContent=data.yearBuilt;
+            document.getElementById('invCoords').textContent=data.lat+', '+data.lng;
+            document.getElementById('invDate').textContent=new Date(data.date).toLocaleDateString();
+            document.getElementById('invoiceWrapper').scrollIntoView({behavior:'smooth',block:'center'});
             const policies=JSON.parse(localStorage.getItem('pae_policies')||'{}');
             policies[policyNumber]=data;localStorage.setItem('pae_policies',JSON.stringify(policies));
             loadMyPolicies();
         }
 
-        function printInvoice(){
-            window.print();
+        function printInvoice(){window.print();}
+        function resetAll(){
+            document.getElementById('formContainer').style.display='block';
+            document.getElementById('invoiceWrapper').classList.remove('active');
+            switchStep(1);
+            document.getElementById('country').value='';document.getElementById('houseValue').value='';
+            document.getElementById('area').value='';document.getElementById('rooms').value='';
+            document.getElementById('yearBuilt').value='';document.getElementById('fullName').value='';
+            document.getElementById('email').value='';selectedLat=null;selectedLng=null;
+            document.getElementById('coordsDisplay').textContent='📍 Click on the map to select your home location';
+            if(mapMarker)mapPicker.removeLayer(mapMarker);
+            document.getElementById('formContainer').scrollIntoView({behavior:'smooth'});
         }
 
         function loadMyPolicies(){
-            const t=translations[currentLang];
             const policies=JSON.parse(localStorage.getItem('pae_policies')||'{}');
             const div=document.getElementById('policiesList');
             const keys=Object.keys(policies);
-            if(keys.length===0){div.innerHTML='<p style="text-align:center;color:var(--text2);">'+t.policies_empty+'</p>';return;}
-            let h='<div style="overflow-x:auto;"><table class="policies-table"><tr><th>Policy #</th><th>Name</th><th>Amount</th><th>Country</th><th>Date</th></tr>';
-            keys.forEach(k=>{const p=policies[k];h+='<tr><td style="color:var(--gold);">'+k+'</td><td>'+p.fullName+'</td><td>$'+parseInt(p.amount).toLocaleString('en-US')+'</td><td>'+p.country+'</td><td>'+new Date(p.date).toLocaleDateString()+'</td></tr>';});
-            h+='</table></div>';div.innerHTML=h;
+            if(keys.length===0){div.innerHTML='<p style="text-align:center;color:var(--text-muted);">No policies yet.</p>';return;}
+            let h='<table class="policies-table"><tr><th>Policy #</th><th>Name</th><th>Amount</th><th>Country</th><th>Date</th></tr>';
+            keys.forEach(k=>{const p=policies[k];h+='<tr><td style="color:var(--gold-500);">'+k+'</td><td>'+p.fullName+'</td><td>$'+parseInt(p.amount).toLocaleString('en-US')+'</td><td>'+p.country+'</td><td>'+new Date(p.date).toLocaleDateString()+'</td></tr>';});
+            h+='</table>';div.innerHTML=h;
         }
 
-        // Init
-        buildCountryDropdown();loadMyPolicies();
-        setTimeout(initMapPicker,500);
+        // ============ INIT ============
+        buildCountryDropdown();loadMyPolicies();setTimeout(initMap,600);
         window.addEventListener('resize',()=>{if(mapPicker)mapPicker.invalidateSize();});
-        console.log('🕊️ Peace Angel v4.0 Ready');
+        console.log('🕊️ Peace Angel Foundation v5.0 — Professional Edition');
     </script>
 </body>
 </html>
