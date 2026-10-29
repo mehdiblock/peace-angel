@@ -36,7 +36,9 @@
         header { position: sticky; top: 0; z-index: 1000; background: rgba(10,14,23,0.75); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border-bottom: 1px solid var(--border-subtle); padding: 0 5%; height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: all var(--transition); }
         header.scrolled { height: 58px; background: rgba(10,14,23,0.92); }
         .logo-area { display: flex; align-items: center; gap: 10px; }
-        .logo-img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold-500); box-shadow: 0 0 16px rgba(240,200,80,0.3); object-fit: cover; }
+        .logo-img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold-500); box-shadow: 0 0 16px rgba(240,200,80,0.3); object-fit: cover; background: #0a0e17; }
+        .logo-fallback { display: none; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold-500); background: conic-gradient(#ffd700, #ffaa00, #ffd700, #ffcc00, #ffd700); align-items: center; justify-content: center; font-size: 1.2em; box-shadow: 0 0 16px rgba(240,200,80,0.3); }
+        .logo-fallback.show { display: flex; }
         .logo-text { font-family: var(--font-heading); font-size: 1.3em; font-weight: 700; color: var(--gold-500); letter-spacing: 0.5px; }
         nav { display: flex; align-items: center; gap: 20px; }
         nav a { color: var(--text-secondary); text-decoration: none; font-size: 0.88em; font-weight: 500; transition: color var(--transition); position: relative; padding: 6px 0; }
@@ -160,7 +162,7 @@
         .invoice-paper { background: #ffffff; border-radius: var(--radius-lg); padding: 44px; box-shadow: var(--shadow-gold); color: #1a1a2e; }
         .invoice-paper .header-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 2px solid #f0c850; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
         .invoice-paper .header-row .title { font-family: var(--font-heading); font-size: 1.6em; font-weight: 700; color: #1a1a2e; }
-        .invoice-paper .stamp { width: 70px; height: 70px; border-radius: 50%; overflow: hidden; border: 3px solid #f0c850; box-shadow: 0 0 20px rgba(240,200,80,0.3); flex-shrink: 0; }
+        .invoice-paper .stamp { width: 70px; height: 70px; border-radius: 50%; overflow: hidden; border: 3px solid #f0c850; box-shadow: 0 0 20px rgba(240,200,80,0.3); flex-shrink: 0; background: #0a0e17; display: flex; align-items: center; justify-content: center; font-size: 1.8em; }
         .invoice-paper .stamp img { width: 100%; height: 100%; object-fit: cover; }
         .invoice-paper .policy-num { font-family: var(--font-mono); font-size: 1.2em; color: #c49a20; font-weight: 700; letter-spacing: 1px; padding: 12px; background: #f9f9f9; border-radius: var(--radius-sm); text-align: center; margin: 16px 0; }
         .invoice-paper .detail-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; font-size: 0.9em; }
@@ -196,6 +198,17 @@
         .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.2); border-radius: 50%; border-top-color: var(--gold-500); animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Restricted Country Modal */
+        .restricted-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
+        .restricted-modal.active { display: flex; }
+        .restricted-card { background: var(--bg-secondary); border: 2px solid var(--red-500); border-radius: var(--radius-lg); padding: 40px 30px; text-align: center; max-width: 480px; width: 90%; box-shadow: 0 0 60px rgba(239,68,68,0.3); }
+        .restricted-icon { font-size: 4em; margin-bottom: 20px; animation: shake 0.6s ease; }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .restricted-card h2 { color: var(--red-500); font-family: var(--font-heading); font-size: 1.8em; margin-bottom: 15px; }
+        .restricted-card p { color: var(--text-secondary); font-size: 1.05em; margin-bottom: 10px; line-height: 1.7; }
+        .restricted-card .btn-close-restricted { background: var(--red-500); color: white; border: none; padding: 14px 40px; border-radius: 50px; font-weight: 700; font-size: 1em; cursor: pointer; margin-top: 20px; transition: all var(--transition); font-family: var(--font-body); }
+        .restricted-card .btn-close-restricted:hover { background: #dc2626; transform: translateY(-2px); }
+
         @media print {
             html, body { width: 100%; height: auto; margin: 0; padding: 0; background: white; }
             body * { visibility: hidden; }
@@ -203,7 +216,7 @@
             .invoice-wrapper { position: absolute; left: 0; top: 0; width: 100%; display: block; }
             .invoice-paper { box-shadow: none; border: none; padding: 20px; border-radius: 0; page-break-after: avoid; }
             .invoice-paper .actions { display: none; }
-            header, footer, .section, #particles, .modal-overlay { display: none !important; }
+            header, footer, .section, #particles, .modal-overlay, .restricted-modal { display: none !important; }
             @page { margin: 10mm; size: A4; }
         }
 
@@ -222,7 +235,15 @@
 
     <!-- HEADER -->
     <header id="header">
-        <div class="logo-area"><img src="https://ipfs.io/ipfs/bafybeieyjasax6wp4venevpnpu5rifwxzgi6u3wzma32ay3z2qvkrfi6iq" alt="PAE" class="logo-img"><span class="logo-text">Peace Angel</span></div>
+        <div class="logo-area">
+            <img src="logo.png" 
+                 alt="PAE Token Logo" 
+                 class="logo-img" 
+                 id="logoImg"
+                 onerror="this.style.display='none'; document.getElementById('logoFallback').classList.add('show');">
+            <div class="logo-fallback" id="logoFallback">🕊️</div>
+            <span class="logo-text">Peace Angel</span>
+        </div>
         <nav>
             <a href="#home" data-key="nav_home">Home</a><a href="#how" data-key="nav_how">How It Works</a><a href="#coverage" data-key="nav_coverage">Coverage</a><a href="#insurance" data-key="nav_insurance">Get Insured</a><a href="#faq" data-key="nav_faq">FAQ</a>
             <button class="btn-wallet" id="btnConnect" onclick="openWalletModal()" data-key="connect_wallet">Connect Wallet</button>
@@ -241,6 +262,18 @@
             <div class="wallet-option" onclick="connectMetaMask()"><img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt=""><span>MetaMask</span></div>
             <div class="wallet-option" onclick="connectWalletConnect()"><img src="https://trustwallet.com/assets/images/favicon.png" alt=""><span data-key="walletconnect">WalletConnect / Trust Wallet</span></div>
             <button class="btn-outline-form" style="margin-top:14px;" onclick="closeWalletModal()" data-key="cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Restricted Country Modal -->
+    <div class="restricted-modal" id="restrictedModal">
+        <div class="restricted-card">
+            <div class="restricted-icon">🚫</div>
+            <h2>Service Not Available</h2>
+            <p><strong>Unfortunately, our insurance services are not currently available in this region.</strong></p>
+            <p>We are actively working to expand our coverage. Please check back later or contact our support team for more information.</p>
+            <p style="color:var(--gold-500); font-size:0.9em; margin-top:15px;">Regions currently not served: Iran, Yemen, Syria, Lebanon, Israel</p>
+            <button class="btn-close-restricted" onclick="closeRestrictedModal()">I Understand</button>
         </div>
     </div>
 
@@ -274,7 +307,7 @@
     <div class="form-container" id="formContainer">
         <div class="progress-bar"><div class="progress-line"><div class="progress-fill" id="progressFill" style="width:33%"></div></div><div class="progress-step active" id="step1ind"><div class="progress-dot"></div><span data-key="step1_label">Details</span></div><div class="progress-step" id="step2ind"><div class="progress-dot"></div><span data-key="step2_label">Review</span></div><div class="progress-step" id="step3ind"><div class="progress-dot"></div><span data-key="step3_label">Pay</span></div></div>
         <div class="form-step active" id="step1">
-            <div class="form-group"><label data-key="lbl_country">Country <span class="req">*</span></label><select id="country"></select></div>
+            <div class="form-group"><label data-key="lbl_country">Country <span class="req">*</span></label><select id="country" onchange="checkRestrictedCountry()"></select></div>
             <div class="form-row"><div class="form-group"><label data-key="lbl_value">Home Value (USD) <span class="req">*</span></label><input type="number" id="houseValue" placeholder="100,000" min="1000"></div><div class="form-group"><label data-key="lbl_area">Area (m²) <span class="req">*</span></label><input type="number" id="area" placeholder="120" min="10"></div></div>
             <div class="form-row"><div class="form-group"><label data-key="lbl_rooms">Rooms <span class="req">*</span></label><input type="number" id="rooms" placeholder="3" min="1" max="20"></div><div class="form-group"><label data-key="lbl_year">Year Built <span class="req">*</span></label><input type="number" id="yearBuilt" placeholder="2015" min="1900" max="2026"></div></div>
             <div class="form-group"><label data-key="lbl_location">Home Location (click map) <span class="req">*</span></label><div class="map-picker" id="mapPicker"></div><div class="coords-display" id="coordsDisplay">📍 Click on the map</div><input type="hidden" id="latitude"><input type="hidden" id="longitude"></div>
@@ -290,7 +323,7 @@
         </div>
     </div>
     <!-- INVOICE -->
-    <div class="invoice-wrapper" id="invoiceWrapper"><div class="invoice-paper"><div class="header-row"><div><div class="title">Peace Angel Foundation</div><p style="color:#666;font-size:0.9em;" data-key="inv_subtitle">Decentralized War Insurance Policy</p></div><div class="stamp"><img src="https://ipfs.io/ipfs/bafybeieyjasax6wp4venevpnpu5rifwxzgi6u3wzma32ay3z2qvkrfi6iq" alt="PAE Stamp"></div></div><p style="text-align:center;color:#555;font-weight:600;" data-key="inv_policy_label">Policy Number</p><div class="policy-num" id="invPolicyNum">--</div><div style="margin-top:20px;"><div class="detail-row"><strong data-key="inv_name">Insured Name</strong><span id="invName">--</span></div><div class="detail-row"><strong data-key="inv_email">Email</strong><span id="invEmail">--</span></div><div class="detail-row"><strong data-key="inv_amount">Amount Paid</strong><span id="invAmount">--</span></div><div class="detail-row"><strong data-key="inv_currency">Currency</strong><span id="invCurrency">--</span></div><div class="detail-row"><strong data-key="inv_country">Country</strong><span id="invCountry">--</span></div><div class="detail-row"><strong data-key="inv_value">Home Value</strong><span id="invValue">--</span></div><div class="detail-row"><strong data-key="inv_area">Area</strong><span id="invArea">--</span></div><div class="detail-row"><strong data-key="inv_rooms">Rooms</strong><span id="invRooms">--</span></div><div class="detail-row"><strong data-key="inv_year">Year Built</strong><span id="invYear">--</span></div><div class="detail-row"><strong data-key="inv_location">Location</strong><span id="invCoords">--</span></div><div class="detail-row"><strong data-key="inv_date">Date Issued</strong><span id="invDate">--</span></div></div><div class="actions"><button class="btn-print" onclick="printInvoice()" data-key="btn_print">🖨️ Print</button><button class="btn-pdf" onclick="printInvoice()" data-key="btn_pdf">📄 Save PDF</button><button class="btn-outline-form" style="width:auto;padding:12px 28px;" onclick="resetAll()" data-key="btn_new">New Policy</button></div></div></div></section>
+    <div class="invoice-wrapper" id="invoiceWrapper"><div class="invoice-paper"><div class="header-row"><div><div class="title">Peace Angel Foundation</div><p style="color:#666;font-size:0.9em;" data-key="inv_subtitle">Decentralized War Insurance Policy</p></div><div class="stamp" id="invoiceStamp"><img src="logo.png" alt="PAE Stamp" onerror="this.style.display='none'; this.parentElement.innerHTML='🕊️';"></div></div><p style="text-align:center;color:#555;font-weight:600;" data-key="inv_policy_label">Policy Number</p><div class="policy-num" id="invPolicyNum">--</div><div style="margin-top:20px;"><div class="detail-row"><strong data-key="inv_name">Insured Name</strong><span id="invName">--</span></div><div class="detail-row"><strong data-key="inv_email">Email</strong><span id="invEmail">--</span></div><div class="detail-row"><strong data-key="inv_amount">Amount Paid</strong><span id="invAmount">--</span></div><div class="detail-row"><strong data-key="inv_currency">Currency</strong><span id="invCurrency">--</span></div><div class="detail-row"><strong data-key="inv_country">Country</strong><span id="invCountry">--</span></div><div class="detail-row"><strong data-key="inv_value">Home Value</strong><span id="invValue">--</span></div><div class="detail-row"><strong data-key="inv_area">Area</strong><span id="invArea">--</span></div><div class="detail-row"><strong data-key="inv_rooms">Rooms</strong><span id="invRooms">--</span></div><div class="detail-row"><strong data-key="inv_year">Year Built</strong><span id="invYear">--</span></div><div class="detail-row"><strong data-key="inv_location">Location</strong><span id="invCoords">--</span></div><div class="detail-row"><strong data-key="inv_date">Date Issued</strong><span id="invDate">--</span></div></div><div class="actions"><button class="btn-print" onclick="printInvoice()" data-key="btn_print">🖨️ Print</button><button class="btn-pdf" onclick="printInvoice()" data-key="btn_pdf">📄 Save PDF</button><button class="btn-outline-form" style="width:auto;padding:12px 28px;" onclick="resetAll()" data-key="btn_new">New Policy</button></div></div></div></section>
 
     <!-- ABOUT -->
     <section class="section section-dark" id="about"><span class="section-label" data-key="about_label">Why Us</span><h2 class="section-title" data-key="about_title">Why <span class="gold">Peace Angel?</span></h2><div class="about-grid"><div class="about-card" data-aos="fade-up"><div class="icon">🔗</div><h3 data-key="about1_title">Fully On-Chain</h3><p data-key="about1_desc">Immutable Polygon storage.</p></div><div class="about-card" data-aos="fade-up" data-aos-delay="100"><div class="icon">⚡</div><h3 data-key="about2_title">Instant Claims</h3><p data-key="about2_desc">Auto-release via smart contracts.</p></div><div class="about-card" data-aos="fade-up" data-aos-delay="200"><div class="icon">🌍</div><h3 data-key="about3_title">Borderless</h3><p data-key="about3_desc">Anyone, anywhere.</p></div><div class="about-card" data-aos="fade-up" data-aos-delay="300"><div class="icon">🛡️</div><h3 data-key="about4_title">PAE Token</h3><p data-key="about4_desc">20% discount.</p></div><div class="about-card" data-aos="fade-up" data-aos-delay="400"><div class="icon">💰</div><h3 data-key="about5_title">Low Premiums</h3><p data-key="about5_desc">Up to 60% cheaper.</p></div><div class="about-card" data-aos="fade-up" data-aos-delay="500"><div class="icon">🔐</div><h3 data-key="about6_title">Privacy First</h3><p data-key="about6_desc">No KYC required.</p></div></div></section>
@@ -314,6 +347,12 @@
         let selectedLat = null, selectedLng = null, mapPicker = null, mapMarker = null;
         let paymentTimer = null, timerSeconds = 600;
 
+        // ============================================================
+        // RESTRICTED COUNTRIES - Cannot be insured currently
+        // Iran, Yemen, Syria, Lebanon, Israel
+        // ============================================================
+        const RESTRICTED_CODES = ['IR', 'YE', 'SY', 'LB', 'IL'];
+
         // Country data with flags
         const countriesData = [
             {code:'AF',flag:'🇦🇫',name:{en:'Afghanistan',ar:'أفغانستان',fr:'Afghanistan'},rate:0.05},
@@ -330,8 +369,39 @@
             {code:'TR',flag:'🇹🇷',name:{en:'Turkey',ar:'تركيا',fr:'Turquie'},rate:0.01},
             {code:'DE',flag:'🇩🇪',name:{en:'Germany',ar:'ألمانيا',fr:'Allemagne'},rate:0.005},
             {code:'FR',flag:'🇫🇷',name:{en:'France',ar:'فرنسا',fr:'France'},rate:0.005},
-            {code:'CH',flag:'🇨🇭',name:{en:'Switzerland',ar:'سويسرا',fr:'Suisse'},rate:0.005}
+            {code:'CH',flag:'🇨🇭',name:{en:'Switzerland',ar:'سويسرا',fr:'Suisse'},rate:0.005},
+            {code:'LB',flag:'🇱🇧',name:{en:'Lebanon',ar:'لبنان',fr:'Liban'},rate:0.04},
+            {code:'IL',flag:'🇮🇱',name:{en:'Israel',ar:'إسرائيل',fr:'Israël'},rate:0.03}
         ];
+
+        // ============================================================
+        // RESTRICTED COUNTRY CHECK
+        // ============================================================
+        function checkRestrictedCountry() {
+            const select = document.getElementById('country');
+            const selectedCode = select.value;
+
+            if (RESTRICTED_CODES.includes(selectedCode)) {
+                document.getElementById('restrictedModal').classList.add('active');
+                select.value = '';
+            }
+        }
+
+        function closeRestrictedModal() {
+            document.getElementById('restrictedModal').classList.remove('active');
+        }
+
+        function buildCountryDropdown(){
+            const s=document.getElementById('country');
+            const def={en:'-- Select --',ar:'-- اختر --',fr:'-- Choisir --'};
+            s.innerHTML='<option value="">'+def[currentLang]+'</option>';
+            countriesData.forEach(c=>{
+                const o=document.createElement('option');
+                o.value=c.code;
+                o.textContent=c.flag+' '+c.name[currentLang]+' ('+(c.rate*100).toFixed(1)+'%)';
+                s.appendChild(o);
+            });
+        }
 
         const translations = {
             en: {
@@ -456,19 +526,6 @@
             AOS.refresh();
         }
 
-        // Build country dropdown
-        function buildCountryDropdown(){
-            const s=document.getElementById('country');
-            const def={en:'-- Select --',ar:'-- اختر --',fr:'-- Choisir --'};
-            s.innerHTML='<option value="">'+def[currentLang]+'</option>';
-            countriesData.forEach(c=>{
-                const o=document.createElement('option');
-                o.value=c.rate;
-                o.textContent=c.flag+' '+c.name[currentLang]+' ('+(c.rate*100).toFixed(1)+'%)';
-                s.appendChild(o);
-            });
-        }
-
         // Map
         function initMap(){
             if(mapPicker)return;
@@ -489,7 +546,7 @@
         function closeWalletModal(e){if(!e||e.target===document.getElementById('walletModal'))document.getElementById('walletModal').classList.remove('active');}
         async function connectMetaMask(){
             if(window.ethereum){try{const a=await window.ethereum.request({method:'eth_requestAccounts'});userAddress=a[0];updateWalletUI();closeWalletModal();}catch(e){console.error(e);}}
-            else{const m=/Android|iPhone|iPad/i.test(navigator.userAgent);if(m){window.location.href='https://metamask.app.link/dapp/peaceangel.ir';}else{alert('Install MetaMask.');}}
+            else{const m=/Android|iPhone|iPad/i.test(navigator.userAgent);if(m){window.location.href='https://metamask.app.link/dapp/peaceangeltoken.com';}else{alert('Install MetaMask.');}}
         }
         function connectWalletConnect(){alert('Open Trust Wallet and scan QR.');closeWalletModal();}
         function disconnectWallet(){userAddress=null;updateWalletUI();}
@@ -523,7 +580,12 @@
         // Form Steps
         function validateStep1(){
             const t=translations[currentLang];
-            if(!document.getElementById('country').value){alert(t.alert_country);return false;}
+            const countrySelect = document.getElementById('country');
+            if(!countrySelect.value){alert(t.alert_country);return false;}
+            if(RESTRICTED_CODES.includes(countrySelect.value)){
+                document.getElementById('restrictedModal').classList.add('active');
+                return false;
+            }
             if(!document.getElementById('houseValue').value||parseInt(document.getElementById('houseValue').value)<1000){alert(t.alert_value);return false;}
             if(!document.getElementById('area').value||parseInt(document.getElementById('area').value)<10){alert(t.alert_area);return false;}
             if(!document.getElementById('rooms').value||parseInt(document.getElementById('rooms').value)<1){alert(t.alert_rooms);return false;}
@@ -533,10 +595,14 @@
             if(!document.getElementById('email').value||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value)){alert(t.alert_email);return false;}
             return true;
         }
+
         function goToStep2(){
             if(!validateStep1())return;
-            const rr=parseFloat(document.getElementById('country').value),hv=parseFloat(document.getElementById('houseValue').value);
-            yearlyPremium=hv*rr;
+            const selectedCode = document.getElementById('country').value;
+            const countryData = countriesData.find(c => c.code === selectedCode);
+            const rr = countryData ? countryData.rate : 0.01;
+            const hv = parseFloat(document.getElementById('houseValue').value);
+            yearlyPremium = hv * rr;
             document.getElementById('premiumDisplay').textContent='$'+yearlyPremium.toLocaleString('en-US',{maximumFractionDigits:0});
             document.getElementById('premiumDetail').textContent='Risk: '+(rr*100).toFixed(1)+'% | Monthly: $'+(yearlyPremium/12).toLocaleString('en-US',{maximumFractionDigits:0});
             document.getElementById('pricePAE').textContent='$'+(yearlyPremium*0.8).toLocaleString('en-US',{maximumFractionDigits:0});
@@ -554,7 +620,7 @@
             const isM=/Android|iPhone|iPad/i.test(navigator.userAgent);
             document.querySelector('.mobile-pay-buttons').style.display=isM?'flex':'none';
             if(isM){
-                document.getElementById('metaMaskDeepLink').href='https://metamask.app.link/dapp/peaceangel.ir';
+                document.getElementById('metaMaskDeepLink').href='https://metamask.app.link/dapp/peaceangeltoken.com';
                 document.getElementById('trustDeepLink').href='https://link.trustwallet.com/send?address='+RECIPIENT_WALLET;
             }
             switchStep(3);startTimer();
@@ -609,7 +675,7 @@
 
         buildCountryDropdown();buildCountryCards();loadMyPolicies();setTimeout(initMap,600);
         window.addEventListener('resize',()=>{if(mapPicker)mapPicker.invalidateSize();});
-        console.log('🕊️ Peace Angel v6.0 — Multilingual + Country Cards');
+        console.log('🕊️ Peace Angel v6.2 — Local Logo + Restricted Countries');
     </script>
 </body>
 </html>
